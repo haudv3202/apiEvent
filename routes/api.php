@@ -58,6 +58,7 @@ Route::middleware('auth:api')->prefix('feedback')->group(function() {
 //Route::apiResource('notification',notificationController::class)->middleware('auth:api');
 Route::middleware('auth:api')->prefix('notification')->group(function() {
     Route::post('/send',[notificationController::class,'create']);
+    Route::get('/test',[notificationController::class,'test']);
     Route::get('/',[notificationController::class,'index']);
     Route::post('/',[notificationController::class,'store']);
     Route::get('/show/{id}',[notificationController::class,'show']);
@@ -104,6 +105,7 @@ Route::get('messageBox/{event_id}', [chatController::class, 'showMessageInEvent'
 
 //Event statistics
 Route::get('statistics',[eventController::class,'Statistics'])->middleware('auth:api');
+Route::get('eventStatisticsStudent',[eventController::class,'StatisticsStudentJoin']);
 Route::get('getNearstEvent',[eventController::class,'getNearstEvent'])->middleware('auth:api');
 Route::post('eventStatistics',[eventController::class,'eventStatistics'])->middleware('auth:api');
 Route::post('recreateEvent',[eventController::class,'recreateEvent'])->middleware('auth:api');

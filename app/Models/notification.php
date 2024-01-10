@@ -8,11 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 class notification extends Model
 {
     use HasFactory;
-    protected $fillable = ['title','content','receiver_id','time_send'];
+//'receiver_id'
+    protected $fillable = ['title','content','status','event_id','time_send','sent_at'];
 
 
-    public function user_receiver()
+//    public function user_receiver()
+//    {
+//        return $this->belongsTo(User::class, 'receiver_id','id');
+//    }
+
+    public function event()
     {
-        return $this->belongsTo(User::class, 'receiver_id','id');
+        return $this->hasOne(event::class,'id','event_id');
     }
 }

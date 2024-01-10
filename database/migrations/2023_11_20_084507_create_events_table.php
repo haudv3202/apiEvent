@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('contact');
             $table->tinyInteger('status')->default(2);
             $table->foreignIdFor(User::class);
-            $table->longText('description');
+//            $table->longText('description');
             $table->longText('content');
             $table->string('banner');
             $table->dateTime('start_time');

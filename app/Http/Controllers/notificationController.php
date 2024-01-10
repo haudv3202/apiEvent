@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\EmailApi;
 use Illuminate\Support\Facades\Validator;
 use App\Models\event;
+use Illuminate\Validation\Rule;
 use OpenApi\Annotations as OA;
 
 class notificationController extends Controller
@@ -54,18 +55,9 @@ class notificationController extends Controller
      *                     @OA\Property(property="content", type="string", example="<h1 style='color:red;'>Test message</h1>"),
      *                     @OA\Property(property="time_send", type="string", format="date-time", example="2023-11-25 01:42:27"),
      *                     @OA\Property(property="sent_at", type="string", format="date-time", example="2023-11-25 01:50:33"),
-     *                     @OA\Property(property="receiver_id", type="integer", example=2),
+     *                     @OA\Property(property="status", type="integer", example=2),
      *                     @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-28 11:00:00"),
-     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-28 11:30:00"),
-     *                     @OA\Property(property="user_receiver", type="object",
-     *     @OA\Property(property="id", type="integer", example=1),
-     *     @OA\Property(property="name", type="string", example="John Doe"),
-     *     @OA\Property(property="email", type="string", example="john.doe@example.com"),
-     *     @OA\Property(property="phone", type="string", example="123456789"),
-     *     @OA\Property(property="role", type="integer", example=1),
-     *     @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-23 11:20:22"),
-     *     @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-23 11:20:22")
-     * )
+     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-28 11:30:00")
      *                 )
      *             ),
      *                 @OA\Property(property="totalDocs", type="integer", example=16),
@@ -114,11 +106,13 @@ class notificationController extends Controller
             $page = $request->query('page', 1);
             $limit = $request->query('limit', 10);
             $status = $request->query('pagination', false);
-            $query = notification::with('user_receiver');
+//            ::with('user_receiver')
+            $query = notification::with('event');
             $notification = ($status) ? $query->get() : $query->paginate($limit, ['*'], 'page', $page);
             if ($page > $notification->lastPage()) {
                 $page = 1;
-                $notification = notification::with('user_receiver')->paginate($limit, ['*'], 'page', $page);
+//                with('user_receiver')->
+                $notification = notification::with('event')->paginate($limit, ['*'], 'page', $page);
             }
             return response()->json(handleData($status,$notification), Response::HTTP_OK);
         }catch(\Exception $e) {
@@ -130,7 +124,7 @@ class notificationController extends Controller
         }
     }
 
-//    public function test(){
+    public function test(){
 //        $currentDateTime = Carbon::now();
 //        $fiveHoursAgo = $currentDateTime->subHours(5)->toDateTimeString();
 //        $events = event::where('start_time', '>', $fiveHoursAgo)
@@ -138,22 +132,39 @@ class notificationController extends Controller
 //            ->whereDate('start_time', '=', $currentDateTime->toDateString())
 //            ->where('status', 1)
 //            ->get();
-//        foreach ($events as $item) {
-//
+
+        $currentDateTime = Carbon::now()->toDateTimeString();
+        $emails = notification::where('time_send', '<=', $currentDateTime)
+            ->with(['event' => function($query){
+                 $query->with('attendances.user');
+            }])
+            ->whereNull('sent_at')
+            ->get();
+//        dd($emails);
+//        tt người tham gia sự kiện
+//        $emails[0]->event->attendances
+//        return response()->json([
+//            'metadata' => $emails[0]->event->attendances,
+//            'message' => 'test',
+//            'status' => 'success',
+//            'statusCode' => Response::HTTP_OK
+//        ], Response::HTTP_OK);
+        foreach ($emails as $item) {
+//            dd($item);
 //            dd($item->user->receivedNotifications->last()->content);
-//            foreach($item->attendances as $userSend){
-//                $data = [
-//                    'title' => "EMAIL NHẮC NHỞ SỰ KIỆN " . $item->name,
-//                    'message' =>$item->user->receivedNotifications->last()->content,
-//                ];
-////                $userSend->user->email
-//                dd($userSend->user);
-//            }
+            foreach($item->event->attendances as $userSend){
+                      $data = [
+                          'title' => $item->title,
+                          'message' =>$item->content,
+                      ];
+//                $userSend->user->email
+                dd($userSend->user->email);
+            }
 //
 //        }
 
-
-//    }
+        }
+    }
 
     /**
      * @OA\Post(
@@ -166,7 +177,10 @@ class notificationController extends Controller
      *      - Role được sử dụng là cả hai role nhân viên ,quản lí
      *      - title là tiêu đề của email muốn gửi
      *      - content là nội dung muốn gửi
-     *      - time_send là thời gian gửi",
+     *      - time_send là thời gian gửi
+     *      - event_id là id của sự kiện cần gửi thông báo
+     *     - status<2|1|0> là trạng thái gửi thông báo của sự kiện đó <2 là chuẩn bị diễn ra, 1 là đang diễn ra, 0 là đã diễn ra>
+     *     - Muốn set 1 thông báo sự kiện A được thông báo trước khi sự kiện A diễn ra 1 ngày thì status = 2 và (time_send < start_time)",
      *     operationId="storeNotification",
      *     @OA\RequestBody(
      *         required=true,
@@ -174,7 +188,8 @@ class notificationController extends Controller
      *             @OA\Property(property="content", type="string", example="Notification content"),
      *              @OA\Property(property="title", type="string", example="title content"),
      *             @OA\Property(property="time_send", type="string", format="date-time", example="2023-11-28T17:02:29"),
-     *             @OA\Property(property="receiver_id", type="integer", example=1)
+     *             @OA\Property(property="event_id", type="integer", example=1),
+     *             @OA\Property(property="status", type="integer", example=1)
      *         )
      *     ),
      *     @OA\Response(
@@ -191,20 +206,10 @@ class notificationController extends Controller
      *                     @OA\Property(property="content", type="string", example="<h1 style='color:red;'>Test message</h1>"),
      *                     @OA\Property(property="time_send", type="string", format="date-time", example="2023-11-25 01:42:27"),
      *                     @OA\Property(property="sent_at", type="string", format="date-time", example="2023-11-25 01:50:33"),
-     *                     @OA\Property(property="receiver_id", type="integer", example=2),
+     *                     @OA\Property(property="status", type="integer", example=2),
      *                     @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-28 11:00:00"),
-     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-28 11:30:00"),
-     *                     @OA\Property(property="user_receiver", type="object",
-     *     @OA\Property(property="id", type="integer", example=1),
-     *     @OA\Property(property="name", type="string", example="John Doe"),
-     *     @OA\Property(property="email", type="string", example="john.doe@example.com"),
-     *     @OA\Property(property="phone", type="string", example="123456789"),
-     *     @OA\Property(property="role", type="integer", example=1),
-     *     @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-23 11:20:22"),
-     *     @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-23 11:20:22")
-     * )
-     *                 )
-     *             ),
+     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-28 11:30:00")
+     *             )),
      *             @OA\Property(property="message", type="string", example="Cài đặt gửi email thành công"),
      *             @OA\Property(property="status", type="string", example="success"),
      *             @OA\Property(property="statusCode", type="integer", example=200)
@@ -220,7 +225,7 @@ class notificationController extends Controller
      *                 "content": {"Nội đung không được để trống"},
      *                 "create_by": {"ID người tạo không được để trống"},
      *                 "time_send": {"Thời gian không được để trống"},
-     *                 "receiver_id": {"Người nhận không được để trống"}
+     *                 "status": {"Người nhận không được để trống"}
      *             }),
      *             @OA\Property(property="statusCode", type="integer", example=400)
      *         )
@@ -252,13 +257,31 @@ class notificationController extends Controller
             $validator = Validator::make($request->all(), [
                 'title' => 'required',
                 'content' => 'required',
-                'time_send' => 'required',
-                'receiver_id' => 'required|exists:users,id',
+                'status' => ['required',  Rule::in([0, 1, 2])],
+//                'receiver_id' => 'required|exists:users,id',
+                'event_id' => 'required|exists:events,id',
+                'time_send' => ['unique:notifications,time_send', 'after:' . now(),function ($attribute, $value, $fail) use ($request) {
+                    $status = $request->input('status');
+                    $eventId = $request->input('event_id');
+                    $event = Event::find($eventId);
+                    if ($status == 2 && Carbon::parse($value)->greaterThanOrEqualTo($event->start_time)) {
+                        $fail('Trạng thái gửi là chuẩn bị diễn ra thì thời gian phải trước khi thời gian sự kiện diễn ra');
+                    } elseif ($status == 1 && (Carbon::parse($value)->lessThan($event->start_time) || Carbon::parse($value)->greaterThan($event->end_time))) {
+                        $fail('Trạng thái gửi là đang diễn ra thì thời gian gửi phải trong khoảng thời gian diễn ra sự kiện');
+                    } elseif ($status == 0 && Carbon::parse($value)->lessThan($event->end_time)) {
+                        $fail('Trạng thái gửi là đã kết thúc thì thời gian gửi phải lớn hơn thời gian sự kiện kết thúc');
+                    }
+                }]
             ], [
                 'title.required' => 'Tiêu để không được để trống',
                 'content.required' => 'Nội dung không được để trống',
-                'receiver_id.required' => 'ID của người dùng không được để trống',
-                'receiver_id.exists' => 'ID của người dùng không tồn tại',
+                'status.required' => 'Trạng thái thông báo không để trống',
+                'status.in' => 'Trạng thái chỉ được nhập 2 là chuẩn bị diễn ra, 1 là đang diễn ra, 0 là đã diễn ra',
+                'time_send.unique' => 'Thời gian gửi đã tồn tại',
+                'time_send.after' => 'Thời gian gửi phải sau thời gian hiện tại',
+//                'receiver_id.required' => 'ID của người dùng không được để trống',
+//                'receiver_id.exists' => 'ID của người dùng không tồn tại',
+                'event_id.required' => 'Sự kiện không để trống',
                 'event_id.exists' => 'Sự kiện không tồn tại',
                 'create_by.required' => 'ID của người tạo không được để trống',
                 'create_by.exists' => 'ID của người tạo không tồn tại'
@@ -286,10 +309,13 @@ class notificationController extends Controller
                 'title' => $request->title,
                 'content' => $request->input('content'),
                 'time_send' => $request->time_send,
-                'receiver_id' => $request->receiver_id,
+                'status' => $request->status,
+//                'receiver_id' => $request->receiver_id,
+                'event_id' => $request->event_id,
                 'create_by' => Auth::user()->id
             ]);
-            $notification = notification::with('user_receiver')->get();
+//            with('user_receiver')->
+            $notification = notification::with('event')->get();
             return response()->json([
                 'metadata' => $notification,
                 'message' => 'Tạo thông báo thành công',
@@ -423,18 +449,9 @@ class notificationController extends Controller
      *                 @OA\Property(property="content", type="string", example="<h1 style='color:red;'>Test message</h1>"),
      *                 @OA\Property(property="time_send", type="string", format="date-time", example="2023-11-25 01:42:27"),
      *                 @OA\Property(property="sent_at", type="string", format="date-time", example="2023-11-25 01:50:33"),
-     *                 @OA\Property(property="receiver_id", type="integer", example=2),
+     *                 @OA\Property(property="status", type="integer", example=1),
      *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-28 11:00:00"),
-     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-28 11:30:00"),
-     *                 @OA\Property(property="user_receiver", type="object",
-     *                     @OA\Property(property="id", type="integer", example=1),
-     *                     @OA\Property(property="name", type="string", example="John Doe"),
-     *                     @OA\Property(property="email", type="string", example="john.doe@example.com"),
-     *                     @OA\Property(property="phone", type="string", example="123456789"),
-     *                     @OA\Property(property="role", type="integer", example=1),
-     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-23 11:20:22"),
-     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-23 11:20:22")
-     *                 )
+     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-28 11:30:00")
      *             ),
      *             @OA\Property(property="message", type="string", example="Get One Record Successfully"),
      *             @OA\Property(property="status", type="string", example="success"),
@@ -465,7 +482,8 @@ class notificationController extends Controller
     public function show($id)
     {
         try {
-            $notification = notification::with('user_receiver')->find($id);
+//            with('user_receiver')->
+            $notification = notification::with('event')->find($id);
             return response()->json([
                 'metadata' => $notification,
                 'message' => 'Lấy 1 bản ghi thành công',
@@ -493,7 +511,9 @@ class notificationController extends Controller
      *     - Data trả về là dữ liệu của các thông báo và dữ liệu của user đã được cài đặt
      *     - id ở đây là id của thông báo
      *     - Role được cập nhật là Quản lí và nhân viên
-     *     - id_user là id người thực hiện request update này",
+     *     - event_id là id của sự kiện cần gửi thông báo
+     *     - status<2|1|0> là trạng thái gửi thông báo của sự kiện đó <2 là chuẩn bị diễn ra, 1 là đang diễn ra, 0 là đã diễn ra>
+     *     - Muốn set 1 thông báo sự kiện A được thông báo trước khi sự kiện A diễn ra 1 ngày thì status = 2 và time_send < start_time",
      *     operationId="updateNotificationById",
      *     @OA\Parameter(
      *         name="id",
@@ -508,7 +528,8 @@ class notificationController extends Controller
      *             @OA\Property(property="content", type="string", example="Notification content"),
      *              @OA\Property(property="title", type="string", example="title content"),
      *             @OA\Property(property="time_send", type="string", format="date-time", example="2023-11-28T17:02:29"),
-     *             @OA\Property(property="receiver_id", type="integer", example=1)
+     *             @OA\Property(property="event_id", type="integer", example=1),
+     *             @OA\Property(property="status", type="integer", example=1)
      *         )
      *     ),
      *     @OA\Response(
@@ -553,15 +574,32 @@ class notificationController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $notification = notification::findOrFail($id);
-
+            $notification = notification::with('event')->findOrFail($id);
+//            'receiver_id' => 'exists:users,id',
             $validator = Validator::make($request->all(), [
-                'receiver_id' => 'exists:users,id',
+                'event_id' => 'exists:events,id',
+                'status' => [Rule::in([1, 2, 3])],
+                'time_send' => ['unique:notifications,time_send', 'after:' . now(),function ($attribute, $value, $fail) use ($request,$notification) {
+                    $status = $request->input('status',$notification->status);
+                    $eventId = $request->input('event_id',$notification->event->id);
+                    $eventUpdate = Event::find($eventId);
+                    if ($status == 2 && Carbon::parse($value)->greaterThanOrEqualTo($eventUpdate->start_time)) {
+                        $fail('Trạng thái gửi là chuẩn bị diễn ra thì thời gian phải trước khi thời gian sự kiện diễn ra');
+                    } elseif ($status == 1 && (Carbon::parse($value)->lessThan($eventUpdate->start_time) || Carbon::parse($value)->greaterThan($eventUpdate->end_time))) {
+                        $fail('Trạng thái gửi là đang diễn ra thì thời gian gửi phải trong khoảng thời gian diễn ra sự kiện');
+                    } elseif ($status == 0 && Carbon::parse($value)->lessThan($eventUpdate->end_time)) {
+                        $fail('Trạng thái gửi là đã kết thúc thì thời gian gửi phải lớn hơn thời gian sự kiện kết thúc');
+                    }
+                }]
             ], [
                 'title.required' => 'Tiêu để không được để trống',
                 'content.required' => 'Nội dung không được để trống',
+                'status.required' => 'Trạng thái không được để trống',
+                'status.in' => 'Trạng thái phải là 3 là sắp diễn ra, 2 là đang diễn ra, 1 là đã diễn ra',
                 'receiver_id.required' => 'ID của người dùng không được để trống',
                 'receiver_id.exists' => 'ID của người dùng không tồn tại',
+                'time_send.unique' => 'Thời gian gửi đã tồn tại',
+                'time_send.after' => 'Thời gian gửi phải sau thời gian hiện tại',
                 'event_id.exists' => 'Sự kiện không tồn tại',
                 'create_by.required' => 'ID của người tạo không được để trống',
                 'create_by.exists' => 'ID của người tạo không tồn tại'
@@ -583,11 +621,20 @@ class notificationController extends Controller
                     'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR
                 ], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
-            $data = $request->only(['title', 'content', 'time_send', 'receiver_id']);
+            if($notification->sent_at != null){
+                return response([
+                    "status" => "error",
+                    "message" => "Thông báo đã được gửi không thể cập nhật.Vui lòng thử lại!!",
+                    'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+//            ,'receiver_id'
+            $data = $request->only(['title', 'content', 'time_send','event_id','status']);
             $data['create_by'] = Auth::user()->id;
             $data['updated_at'] = Carbon::now();
             $notification->update($data);
-            $notification = notification::with('user_receiver')->get();
+//            with('user_receiver')->
+            $notification = notification::with('event')->get();
             return response()->json([
                 'metadata' => $notification,
                 'message' => 'Cập nhật thông báo thành công',
@@ -639,18 +686,9 @@ class notificationController extends Controller
      *                     @OA\Property(property="content", type="string", example="<h1 style='color:red;'>Test message</h1>"),
      *                     @OA\Property(property="time_send", type="string", format="date-time", example="2023-11-25 01:42:27"),
      *                     @OA\Property(property="sent_at", type="string", format="date-time", example="2023-11-25 01:50:33"),
-     *                     @OA\Property(property="receiver_id", type="integer", example=2),
+     *                     @OA\Property(property="status", type="integer", example=2),
      *                     @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-28 11:00:00"),
-     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-28 11:30:00"),
-     *                     @OA\Property(property="user_receiver", type="object",
-     *                         @OA\Property(property="id", type="integer", example=1),
-     *                         @OA\Property(property="name", type="string", example="John Doe"),
-     *                         @OA\Property(property="email", type="string", example="john.doe@example.com"),
-     *                         @OA\Property(property="phone", type="string", example="123456789"),
-     *                         @OA\Property(property="role", type="integer", example=1),
-     *                         @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-23 11:20:22"),
-     *                         @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-23 11:20:22")
-     *                     )
+     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-28 11:30:00")
      *                 )
      *             ),
      *             @OA\Property(property="statusCode", type="integer", example=200),
@@ -696,7 +734,8 @@ class notificationController extends Controller
                 ], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
             $notification->delete();
-            $notification = notification::with('user_receiver')->get();
+//            with('user_receiver')->
+            $notification = notification::with('event')->get();
             return response()->json([
                 'metadata' => $notification,
                 'message' => 'Xóa bản ghi thành công',

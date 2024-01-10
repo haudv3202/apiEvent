@@ -9,14 +9,19 @@ use Illuminate\Database\Eloquent\Model;
 class event extends Model
 {
     use HasFactory;
-    protected $fillable = ['name','location','contact','description','content','status','banner','user_id','start_time','end_time'];
-
+    protected $fillable = ['name','location','contact','content','status','banner','user_id','start_time','end_time'];
+//,'description'
 //    protected $casts = [
 //        'banner' => Image::class,
 //    ];
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(notification::class);
     }
 
     public function attendances()
