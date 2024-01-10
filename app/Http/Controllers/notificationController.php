@@ -133,13 +133,38 @@ class notificationController extends Controller
 //            ->where('status', 1)
 //            ->get();
 
-        $currentDateTime = Carbon::now()->toDateTimeString();
-        $emails = notification::where('time_send', '<=', $currentDateTime)
-            ->with(['event' => function($query){
-                 $query->with('attendances.user');
+        $currentDateTime = \Illuminate\Support\Carbon::now();
+        $dateCr = $currentDateTime->toDateTimeString();
+        $fiveHoursAhead = $currentDateTime->addHours(5)->toDateTimeString();
+        $events = event::where('start_time', '>=', $dateCr)
+            ->with(['attendances.user', 'user','notifications' => function($query){
+                $query->where('status',2);
             }])
-            ->whereNull('sent_at')
+            ->where('start_time', '<', $fiveHoursAhead)
+            ->where('status', 2)
+            ->where('notification_sent', false)
             ->get();
+//        dd($events[0]->notifications->last()->content);
+        foreach ($events as $item) {
+            if (!empty($item->attendances)) {
+                foreach ($item->attendances as $userSend) {
+                    $data = [
+                        'title' => "EMAIL NHẮC NHỞ SỰ KIỆN " . $item->name,
+                        'message' => $item->notifications->last()->content,
+                    ];
+
+                    dd($userSend->user->email);
+                }
+            }
+        }
+
+//        $currentDateTime = Carbon::now()->toDateTimeString();
+//        $emails = notification::where('time_send', '<=', $currentDateTime)
+//            ->with(['event' => function($query){
+//                 $query->with('attendances.user');
+//            }])
+//            ->whereNull('sent_at')
+//            ->get();
 //        dd($emails);
 //        tt người tham gia sự kiện
 //        $emails[0]->event->attendances
@@ -149,21 +174,21 @@ class notificationController extends Controller
 //            'status' => 'success',
 //            'statusCode' => Response::HTTP_OK
 //        ], Response::HTTP_OK);
-        foreach ($emails as $item) {
-//            dd($item);
-//            dd($item->user->receivedNotifications->last()->content);
-            foreach($item->event->attendances as $userSend){
-                      $data = [
-                          'title' => $item->title,
-                          'message' =>$item->content,
-                      ];
-//                $userSend->user->email
-                dd($userSend->user->email);
-            }
+//        foreach ($emails as $item) {
+////            dd($item);
+////            dd($item->user->receivedNotifications->last()->content);
+//            foreach($item->event->attendances as $userSend){
+//                      $data = [
+//                          'title' => $item->title,
+//                          'message' =>$item->content,
+//                      ];
+////                $userSend->user->email
+//                dd($userSend->user->email);
+//            }
 //
 //        }
 
-        }
+//        }
     }
 
     /**
