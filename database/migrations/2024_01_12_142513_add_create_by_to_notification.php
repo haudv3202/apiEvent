@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('notifications', function (Blueprint $table) {
-            $table->foreignIdFor(User::class)->default(1);
+            $table->foreignIdFor(User::class);
         });
     }
 

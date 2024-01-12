@@ -441,7 +441,6 @@ class notificationController extends Controller
                     'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR
                 ], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
-
             notification::create([
                 'title' => $request->title,
                 'content' => $request->input('content'),
@@ -449,7 +448,7 @@ class notificationController extends Controller
                 'status' => $request->status,
 //                'receiver_id' => $request->receiver_id,
                 'event_id' => $request->event_id,
-                'user_id' => Auth::user()->id
+                'user_id' => $user->id
             ]);
 //            with('user_receiver')->
             $notification = notification::with(['event', 'create_by'])->get();
