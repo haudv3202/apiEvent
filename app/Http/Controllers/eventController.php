@@ -1051,16 +1051,15 @@ class eventController extends Controller
                 ->with([
                     'feedback' => function ($query) {
                         $query->with('user');
-                    }
-                ])
-                ->with([
+                    },
+                    'keywords',
+                    'user',
+                    'notifications' => function ($query) {
+                        $query->with('create_by');
+                    },
                     'attendances' => function ($query) {
                         $query->with('user');
-                    }
-                ])
-                ->with('keywords')
-                ->with('user')
-                ->with('notifications')
+                    }])
                 ->findOrFail($id);
 //            $event->banner = url("Upload/{$event->banner}");
             return response()->json([
@@ -1774,7 +1773,7 @@ class eventController extends Controller
      *     tags={"Event"},
      *     description="Trả ra 12 tháng và số lượng sinh viên tham gia sự kiện trong tháng đó
      *      - Param không bắt buộc là year (năm) , mặc định là năm hiện tại ",
-     *     @OA\Response(
+     * @OA\Response(
      *         response=200,
      *         description="Successful operation",
      *         @OA\JsonContent(
@@ -1791,7 +1790,7 @@ class eventController extends Controller
      *             )
      *         )
      *     ),
-     *     @OA\Response(
+     * @OA\Response(
      *         response=404,
      *         description="Không tìm thấy bản ghi",
      *         @OA\JsonContent(
@@ -1801,7 +1800,7 @@ class eventController extends Controller
      *             @OA\Property(property="statusCode", type="integer", example=404)
      *         )
      *     ),
-     *     @OA\Response(
+     * @OA\Response(
      *         response=500,
      *         description="Lỗi hệ thống",
      *         @OA\JsonContent(
@@ -1813,7 +1812,8 @@ class eventController extends Controller
      *     )
      * )
      */
-    public function StatisticsStudentJoin(Request $request){
+    public function StatisticsStudentJoin(Request $request)
+    {
         if (Auth::user()->role != 2) {
             return response()->json([
                 'message' => 'Không phải quản lí thì không có quyền vào xem thống kê',

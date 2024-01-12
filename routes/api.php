@@ -24,9 +24,6 @@ use App\Http\Controllers\keywordsController;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
 
 // Google Sign In
 Route::post('/get-google-sign-in-url', [GoogleController::class, 'getGoogleSignInUrl']);
@@ -60,6 +57,7 @@ Route::middleware('auth:api')->prefix('notification')->group(function() {
     Route::post('/send',[notificationController::class,'create']);
     Route::get('/test',[notificationController::class,'test']);
     Route::get('/',[notificationController::class,'index']);
+    Route::get('/settings/{id}',[notificationController::class,'getSettingsNotification']);
     Route::post('/',[notificationController::class,'store']);
     Route::get('/show/{id}',[notificationController::class,'show']);
     Route::patch('/{id}',[notificationController::class,'update']);
@@ -109,6 +107,4 @@ Route::get('eventStatisticsStudent',[eventController::class,'StatisticsStudentJo
 Route::get('getNearstEvent',[eventController::class,'getNearstEvent'])->middleware('auth:api');
 Route::post('eventStatistics',[eventController::class,'eventStatistics'])->middleware('auth:api');
 Route::post('recreateEvent',[eventController::class,'recreateEvent'])->middleware('auth:api');
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+

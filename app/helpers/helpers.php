@@ -25,3 +25,31 @@ function handleData($status = false,$data){
         'statusCode' => Response::HTTP_OK
     ];
 }
+
+
+function getNotifications($query, $status, $type, $limit, $page) {
+    if ($status === 'true') {
+        switch ($type) {
+            case 'all':
+                return $query->withTrashed()->get();
+            case 'sent':
+                return $query->whereNotNull('sent_at')->get();
+            case 'scheduled':
+                return $query->whereNull('sent_at')->get();
+            default:
+                return $query->onlyTrashed()->get();
+        }
+    } else {
+        switch ($type) {
+            case 'all':
+                return $query->withTrashed()->paginate($limit, ['*'], 'page', $page);
+            case 'sent':
+                return $query->whereNotNull('sent_at')->paginate($limit, ['*'], 'page', $page);
+            case 'scheduled':
+                return $query->whereNull('sent_at')->paginate($limit, ['*'], 'page', $page);
+            default:
+                return $query->onlyTrashed()->paginate($limit, ['*'], 'page', $page);
+        }
+    }
+}
+

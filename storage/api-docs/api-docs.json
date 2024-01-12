@@ -5583,6 +5583,121 @@
                 }
             }
         },
+        "/api/notification/settings/{id}": {
+            "get": {
+                "tags": [
+                    "notification"
+                ],
+                "summary": "Lấy ra các thông báo đang được cài đặt theo id người dùng",
+                "description": "\n     *      - endpoint này trả về các thông báo đang theo id người dùng.\n     *      - Trả về thông tin các thông báo người dùng đang cài đặt.\n     *      - Vai trò: Quản lí và nhân viên\n     *      - Sẽ có 1 số option param sau\n     *     - page=<số trang> chuyển sang trang cần\n     *     - limit=<số record> số record muốn lấy trong 1 trang\n     *     - pagination=true|false sẽ là trạng thái phân trang hoặc không phân trang <mặc định là false phân trang>\n     *     - type=<all|sent|scheduled|deleted> sẽ là param để lấy ra các list thông báo đang được setting <mặc định là all>\n     *     - all là lấy ra toàn bộ thông báo đã được setting kể cả đã xóa mềm\n     *     - sent là lấy ra các thông báo đã được gửi\n     *     - scheduled là lấy ra các thông báo đang được cài đặt nhưng chưa được gửi\n     *     - deleted là lấy ra các thông báo đã xóa mềm\n     *     ",
+                "operationId": "6e566d630a777e386521e8504cdef707",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the user",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Successfully retrieved all records"
+                                        },
+                                        "metadata": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Nhắc nhở email"
+                                                    },
+                                                    "content": {
+                                                        "type": "string",
+                                                        "example": "<h1 style='color:red;'>Test message</h1>"
+                                                    },
+                                                    "time_send": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2023-11-25 01:42:27"
+                                                    },
+                                                    "sent_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2023-11-25 01:50:33"
+                                                    },
+                                                    "status": {
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2023-11-28 11:00:00"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2023-11-28 11:30:00"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "totalDocs": {
+                                            "type": "integer",
+                                            "example": 16
+                                        },
+                                        "limit": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "totalPages": {
+                                            "type": "integer",
+                                            "example": 2
+                                        },
+                                        "page": {
+                                            "type": "integer",
+                                            "example": 2
+                                        },
+                                        "pagingCounter": {
+                                            "type": "integer",
+                                            "example": 2
+                                        },
+                                        "hasPrevPage": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "hasNextPage": {
+                                            "type": "boolean",
+                                            "example": false
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/notification/send": {
             "post": {
                 "tags": [
@@ -5817,7 +5932,7 @@
                     "notification"
                 ],
                 "summary": "Xóa thông báo",
-                "description": "Xóa 1 thông báo đang tham gia sự kiện",
+                "description": "Xóa 1 thông báo đang tham gia sự kiện\n     *     - softDel = true|false là xóa mềm (trường deleted_at sẽ được cập nhật) và ngược lại <true là xóa mềm, false là xóa vĩnh viễn><mặc định là true>",
                 "operationId": "deleteNotificationById",
                 "parameters": [
                     {
@@ -7509,6 +7624,54 @@
                 }
             },
             "500": {
+                "description": "System error",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "string",
+                                    "example": "error"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "System error"
+                                },
+                                "statusCode": {
+                                    "type": "integer",
+                                    "example": 500
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "403": {
+                "description": "Record not found",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "string",
+                                    "example": "error"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "Record not found"
+                                },
+                                "statusCode": {
+                                    "type": "integer",
+                                    "example": 404
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "501": {
                 "description": "System error",
                 "content": {
                     "application/json": {
