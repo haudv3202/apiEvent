@@ -6812,18 +6812,17 @@
                 "tags": [
                     "Participants"
                 ],
-                "summary": "Nhập danh sách người dùng từ tệp Excel",
+                "summary": "Nhập danh sách người dùng từ tệp Excel\n     *      - Nhập file excel có dạng type là file name =  listUser",
                 "operationId": "32f396f92f0521a8e45ea0838f34bfa8",
                 "requestBody": {
-                    "description": "Tệp Excel chứa danh sách người dùng",
                     "required": true,
                     "content": {
-                        "multipart/form-data": {
+                        "application/json": {
                             "schema": {
                                 "properties": {
                                     "listUser": {
-                                        "description": "Tệp Excel",
-                                        "type": "file"
+                                        "type": "string",
+                                        "example": "nhập file lên nhé"
                                     }
                                 },
                                 "type": "object"

@@ -362,20 +362,13 @@ class participantsController extends Controller
     /**
      * @OA\Post(
      *     path="/api/importUser",
-     *     summary="Nhập danh sách người dùng từ tệp Excel",
+     *     summary="Nhập danh sách người dùng từ tệp Excel
+     *      - Nhập file excel có dạng type là file name =  listUser",
      *     tags={"Participants"},
      *     @OA\RequestBody(
      *         required=true,
-     *         description="Tệp Excel chứa danh sách người dùng",
-     *         @OA\MediaType(
-     *             mediaType="multipart/form-data",
-     *             @OA\Schema(
-     *                 @OA\Property(
-     *                     property="listUser",
-     *                     description="Tệp Excel",
-     *                     type="file",
-     *                 ),
-     *             )
+     *         @OA\JsonContent(
+     *                              @OA\Property(property="listUser", type="string", example="nhập file lên nhé"),
      *         )
      *     ),
      *     @OA\Response(
