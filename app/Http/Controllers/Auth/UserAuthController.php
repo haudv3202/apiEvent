@@ -96,50 +96,50 @@ class UserAuthController extends Controller
         ], Response::HTTP_OK);
     }
 
-//    /**
-//     * @OA\Post(
-//     *     path="/api/login",
-//     *     tags={"Authentication"},
-//     *     summary="Đăng nhập người dùng",
-//     *     description="
-//     *      - Endpoint này cho phép người dùng đăng nhập vào hệ thống.
-//     *      - Trả về thông tin của người dùng đã đăng nhập, bao gồm cả token đăng nhập.
-//     *      - Role được sử dụng là cả ba role nhân viên ,quản lí ,sinh viên",
-//     *     @OA\RequestBody(
-//     *         required=true,
-//     *         @OA\JsonContent(
-//     *             @OA\Property(property="email", type="string", example="john.doe@example.com"),
-//     *             @OA\Property(property="password", type="string", example="password123"),
-//     *         )
-//     *     ),
-//     *     @OA\Response(
-//     *         response=200,
-//     *         description="Thành công",
-//     *         @OA\JsonContent(
-//     *             @OA\Property(property="metadata", type="object",
-//     *                 @OA\Property(property="id", type="integer", example=1),
-//     *                 @OA\Property(property="name", type="string", example="John Doe"),
-//     *                 @OA\Property(property="email", type="string", example="john.doe@example.com"),
-//     *                 @OA\Property(property="phone", type="string", example="123456789"),
-//     *                 @OA\Property(property="role", type="integer", example=1),
-//     *                 @OA\Property(property="token", type="string", example="api-token")
-//     *             ),
-//     *             @OA\Property(property="message", type="string", example="Đăng nhập người dùng thành công"),
-//     *             @OA\Property(property="status", type="string", example="success"),
-//     *             @OA\Property(property="statusCode", type="integer", example=200),
-//     *         )
-//     *     ),
-//     *     @OA\Response(
-//     *         response=500,
-//     *         description="Lỗi máy chủ nội bộ",
-//     *         @OA\JsonContent(
-//     *             @OA\Property(property="status", type="string", example="error"),
-//     *             @OA\Property(property="message", type="string", example="Thông tin đăng nhập không chính xác. Vui lòng thử lại"),
-//     *             @OA\Property(property="statusCode", type="integer", example=500),
-//     *         )
-//     *     )
-//     * )
-//     */
+    /**
+     * @OA\Post(
+     *     path="/api/login",
+     *     tags={"Authentication"},
+     *     summary="Đăng nhập người dùng",
+     *     description="
+     *      - Endpoint này cho phép người dùng đăng nhập vào hệ thống.
+     *      - Trả về thông tin của người dùng đã đăng nhập, bao gồm cả token đăng nhập.
+     *      - Role được sử dụng là cả ba role nhân viên ,quản lí ,sinh viên",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="email", type="string", example="john.doe@example.com"),
+     *             @OA\Property(property="password", type="string", example="password123"),
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="metadata", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="John Doe"),
+     *                 @OA\Property(property="email", type="string", example="john.doe@example.com"),
+     *                 @OA\Property(property="phone", type="string", example="123456789"),
+     *                 @OA\Property(property="role", type="integer", example=1),
+     *                 @OA\Property(property="token", type="string", example="api-token")
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Đăng nhập người dùng thành công"),
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="statusCode", type="integer", example=200),
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Lỗi máy chủ nội bộ",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="error"),
+     *             @OA\Property(property="message", type="string", example="Thông tin đăng nhập không chính xác. Vui lòng thử lại"),
+     *             @OA\Property(property="statusCode", type="integer", example=500),
+     *         )
+     *     )
+     * )
+     */
 
 
 
