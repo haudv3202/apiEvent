@@ -31,8 +31,9 @@ Route::get('/auth/google', [GoogleController::class, 'loginCallback']);
 Route::get('/callback', [GoogleController::class, 'callback']);
 //
 //Route::post('register',[UserAuthController::class,'register']);
-// Route::post('login',[UserAuthController::class,'login']);
-
+Route::post('login',[UserAuthController::class,'login']);
+Route::post('reset-password', [UserAuthController::class,'sendMail']);
+Route::put('reset-password/{token}', [UserAuthController::class,'reset']);
 //Route::apiResource('employees',EmployeeController::class)->middleware('auth:api');
 
 //Route::apiResource('atendances',atendanceController::class)->middleware('auth:api');
@@ -55,7 +56,7 @@ Route::middleware('auth:api')->prefix('feedback')->group(function() {
 //Route::apiResource('notification',notificationController::class)->middleware('auth:api');
 Route::middleware('auth:api')->prefix('notification')->group(function() {
     Route::post('/send',[notificationController::class,'create']);
-    Route::get('/test',[notificationController::class,'test']);
+//    Route::get('/test',[notificationController::class,'test']);
     Route::get('/',[notificationController::class,'index']);
     Route::get('/settings/{id}',[notificationController::class,'getSettingsNotification']);
     Route::post('/',[notificationController::class,'store']);
@@ -89,7 +90,7 @@ Route::prefix('event')->group(function() {
 
 //Test api in swagger donn't need token
 Route::apiResource('participants',participantsController::class)->middleware('auth:api');
-
+Route::post('importUser',[participantsController::class,'importUser'])->middleware('auth:api');
 Route::get('resourceByEventID/{event_id}',[resourceController::class,'GetRecordByEventId'])->middleware('auth:api');
 Route::apiResource('resource',resourceController::class)->middleware('auth:api');
 

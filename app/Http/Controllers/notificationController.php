@@ -106,12 +106,12 @@ class notificationController extends Controller
             $page = $request->query('page', 1);
             $limit = $request->query('limit', 10);
             $status = $request->query('pagination', false);
-            $query = notification::with(['event', 'create_by']);
+            $query = notification::with(['event', 'create_by','userJoin.user']);
             $notification = ($status) ? $query->get() : $query->paginate($limit, ['*'], 'page', $page);
             if ($page > $notification->lastPage()) {
                 $page = 1;
 //                with('user_receiver')->
-                $notification = notification::with(['event', 'create_by'])->paginate($limit, ['*'], 'page', $page);
+                $notification = notification::with(['event', 'create_by','userJoin.user'])->paginate($limit, ['*'], 'page', $page);
             }
             return response()->json(handleData($status, $notification), Response::HTTP_OK);
         } catch (\Exception $e) {
@@ -216,7 +216,7 @@ class notificationController extends Controller
             $limit = $request->query('limit', 10);
             $status = $request->query('pagination', false);
             $type = $request->query('type', 'all');
-            $query = notification::with(['event', 'create_by'])->where('user_id', $id);
+            $query = notification::with(['event', 'create_by','userJoin.user'])->where('user_id', $id);
 
 //            $notification = ($status) ? $query->withTrashed()->get() : $query->withTrashed()->paginate($limit, ['*'], 'page', $page);
             $notification = getNotifications($query, $status, $type, $limit, $page);
@@ -247,16 +247,17 @@ class notificationController extends Controller
 
         $currentDateTime = \Illuminate\Support\Carbon::now();
         $dateCr = $currentDateTime->toDateTimeString();
-        $fiveHoursAhead = $currentDateTime->addHours(5)->toDateTimeString();
+        $fiveHoursAhead = $currentDateTime->addHours(12)->toDateTimeString();
         $events = event::where('start_time', '>=', $dateCr)
-            ->with(['attendances.user', 'user', 'notifications' => function ($query) {
-                $query->where('status', 2);
+            ->with(['attendances.user', 'user','notifications' => function($query) use ($fiveHoursAhead)    {
+                $query->where('time_send', '<', $fiveHoursAhead);
             }])
             ->where('start_time', '<', $fiveHoursAhead)
             ->where('status', 2)
             ->where('notification_sent', false)
             ->get();
-//        dd($events[0]->notifications->last()->content);
+
+        $notificationsToUpdateEvent = [];
         foreach ($events as $item) {
             if (!empty($item->attendances)) {
                 foreach ($item->attendances as $userSend) {
@@ -264,43 +265,11 @@ class notificationController extends Controller
                         'title' => "EMAIL NHẮC NHỞ SỰ KIỆN " . $item->name,
                         'message' => $item->notifications->last()->content,
                     ];
-
-                    dd($userSend->user->email);
+                    dd($data);
+                    $notificationsToUpdateEvent[] = $item->id;
                 }
             }
         }
-
-//        $currentDateTime = Carbon::now()->toDateTimeString();
-//        $emails = notification::where('time_send', '<=', $currentDateTime)
-//            ->with(['event' => function($query){
-//                 $query->with('attendances.user');
-//            }])
-//            ->whereNull('sent_at')
-//            ->get();
-//        dd($emails);
-//        tt người tham gia sự kiện
-//        $emails[0]->event->attendances
-//        return response()->json([
-//            'metadata' => $emails[0]->event->attendances,
-//            'message' => 'test',
-//            'status' => 'success',
-//            'statusCode' => Response::HTTP_OK
-//        ], Response::HTTP_OK);
-//        foreach ($emails as $item) {
-////            dd($item);
-////            dd($item->user->receivedNotifications->last()->content);
-//            foreach($item->event->attendances as $userSend){
-//                      $data = [
-//                          'title' => $item->title,
-//                          'message' =>$item->content,
-//                      ];
-////                $userSend->user->email
-//                dd($userSend->user->email);
-//            }
-//
-//        }
-
-//        }
     }
 
     /**
@@ -451,7 +420,7 @@ class notificationController extends Controller
                 'user_id' => $user->id
             ]);
 //            with('user_receiver')->
-            $notification = notification::with(['event', 'create_by'])->get();
+            $notification = notification::with(['event', 'create_by','userJoin.user'])->get();
             return response()->json([
                 'metadata' => $notification,
                 'message' => 'Tạo thông báo thành công',
@@ -621,7 +590,7 @@ class notificationController extends Controller
     {
         try {
 //            with('user_receiver')->
-            $notification = notification::with(['event', 'create_by'])->find($id);
+            $notification = notification::with(['event', 'create_by','userJoin.user'])->find($id);
             return response()->json([
                 'metadata' => $notification,
                 'message' => 'Lấy 1 bản ghi thành công',
@@ -771,7 +740,7 @@ class notificationController extends Controller
             $data['updated_at'] = Carbon::now();
             $notification->update($data);
 //            with('user_receiver')->
-            $notification = notification::with(['event', 'create_by'])->get();
+            $notification = notification::with(['event', 'create_by','userJoin.user'])->get();
             return response()->json([
                 'metadata' => $notification,
                 'message' => 'Cập nhật thông báo thành công',
@@ -887,7 +856,7 @@ class notificationController extends Controller
             }
 
 //            with('user_receiver')->
-            $notification = notification::with(['event', 'create_by'])->get();
+            $notification = notification::with(['event', 'create_by','userJoin.user'])->get();
             return response()->json([
                 'metadata' => $notification,
                 'message' => 'Xóa bản ghi thành công',

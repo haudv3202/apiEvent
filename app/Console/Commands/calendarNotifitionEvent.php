@@ -56,6 +56,9 @@ class calendarNotifitionEvent extends Command
                     $notificationsToUpdateEvent[] = $item->id;
 //                    $item->update(['notification_sent' => true]);
                 }
+            }else {
+                Log::info('Không có người tham gia sự kiện ' . $item->name . ' nên không gửi email' .
+                    ' vào lúc ' . $dateCr . 'id sự kiện ' . $item->id);
             }
         }
         event::whereIn('id', $notificationsToUpdateEvent)->update(['notification_sent' => true]);

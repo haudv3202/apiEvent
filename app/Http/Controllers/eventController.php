@@ -145,7 +145,13 @@ class eventController extends Controller
                         ->where('atendances.user_id', Auth::user()->id);
                 }, 'status_join');
             $query->orderBy('id', ($sort) == 'oldest' ? 'asc' : 'desc');
-            $event = ($status) ? $query->get() : $query->paginate($limit, ['*'], 'page', $page);
+//            $event = ($status) ? $query->get() : $query->paginate($limit, ['*'], 'page', $page);
+            if ($search) {
+                $status = true;
+                $event = $query->take($limit)->get();
+            } else {
+                $event = ($status) ? $query->paginate($limit, ['*'], 'page', $page) : $query->paginate(5, ['*'], 'page', $page);
+            }
             if (!$status && $page > $event->lastPage()) {
                 $page = 1;
                 $event = event::where('name', 'like', "%{$search}%")

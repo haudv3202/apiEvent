@@ -23,4 +23,8 @@ class notification extends Model
     {
         return $this->hasOne(event::class,'id','event_id');
     }
+
+    public function userJoin(){
+        return $this->hasMany(atendance::class,'event_id','event_id');
+    }
 }

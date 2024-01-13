@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Response;
+use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Support\Facades\DB;
 
@@ -245,75 +246,67 @@ class participantsController extends Controller
                 : Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-//    /**
-//     * @OA\Post(
-//     *     path="/api/participants",
-//     *     tags={"Participants"},
-//     *     summary="Thêm mới người dùng với dữ liệu được cung cấp",
-//     *     description="
-//     * -Endpoint trả về người dùng vừa được thêm
-//     * -Role người thêm phải lớn hơn hoặc bằng người được thêm
-//     * -Role là sinh viên thì không có quyền thêm
-//     *
-//     * ",
-//     *     operationId="storeParticipants",
-//     *     @OA\RequestBody(
-//     *         required=true,
-//     *         @OA\JsonContent(
-//     *              @OA\Property(property="name", type="string", example="Phuc La"),
-//     *                     @OA\Property(property="email", type="string", example="phuclaf@gmail.com"),
-//     *                     @OA\Property(property="phone", type="string", example="0983118272"),
-//     *                     @OA\Property(property="role", type="integer", example=1),
-//     *         )
-//     *     ),
-//     *    @OA\Response(
-//     *         response=200,
-//     *         description="Successful operation",
-//     *         @OA\JsonContent(
-//     *             @OA\Property(property="status", type="string", example="success"),
-//     *             @OA\Property(property="message", type="string", example="Create Record Successfully"),
-//     *             @OA\Property(property="statusCode", type="int", example=200),
-//     *     @OA\Property(
-//     *                 property="metadata",
-//     *                 type="array",
-//     *                 @OA\Items(
-//     *                     type="object",
-//     *                     @OA\Property(property="name", type="string", example="Phuc La"),
-//     *                     @OA\Property(property="email", type="string", example="phuclaf@gmail.com"),
-//     *                     @OA\Property(property="password", type="string", example="123456"),
-//     *                     @OA\Property(property="phone", type="string", example="0983118272"),
-//     *                     @OA\Property(property="role", type="integer", example=1),
-//     *                 )
-//     *             )
-//     *         )
-//     *     ),
-//     *     @OA\Response(
-//     *         response=500,
-//     *         description="Validation error or internal server error",
-//     *         @OA\JsonContent(
-//     *             @OA\Property(property="status", type="string", example="error"),
-//     *             @OA\Property(property="message", type="object", example={"user_id": {"User ID is required"}}),
-//     *             @OA\Property(property="statusCode", type="int", example=500),
-//
-//     *         )
-//     *     ),
-//     * )
-//     */
+    /**
+     * @OA\Post(
+     *     path="/api/participants",
+     *     tags={"Participants"},
+     *     summary="Thêm mới người dùng với dữ liệu được cung cấp",
+     *     description="
+     * -Endpoint trả về người dùng vừa được thêm
+     * -Role người thêm phải lớn hơn hoặc bằng người được thêm
+     * -Role là sinh viên thì không có quyền thêm
+     * - Password mặc định sẽ là tên email đằng trước dấu @ ví dụ Email là example@gmail.com  thì password là example
+     * - Name cũng vậy
+     * ",
+     *     operationId="storeParticipants",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *                     @OA\Property(property="email", type="string", example="phuclaf@gmail.com"),
+     *                     @OA\Property(property="role", type="integer", example=1),
+     *         )
+     *     ),
+     *    @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="message", type="string", example="Create Record Successfully"),
+     *             @OA\Property(property="statusCode", type="int", example=200),
+     *     @OA\Property(
+     *                 property="metadata",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="name", type="string", example="Phuc La"),
+     *                     @OA\Property(property="email", type="string", example="phuclaf@gmail.com"),
+     *                     @OA\Property(property="password", type="string", example="123456"),
+     *                     @OA\Property(property="phone", type="string", example="0983118272"),
+     *                     @OA\Property(property="role", type="integer", example=1),
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Validation error or internal server error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="error"),
+     *             @OA\Property(property="message", type="object", example={"user_id": {"User ID is required"}}),
+     *             @OA\Property(property="statusCode", type="int", example=500),
+
+     *         )
+     *     ),
+     * )
+     */
     public function store(Request $request)
     {
         try {
             $logUser = auth()->user()->role;
             $userAdd = $request->role;
             $validator = Validator::make($request->all(), [
-                'name' => [
-                    'required'
-                ],
                 'email' => [
                     'required'
-                ],
-                'phone' => [
-                    'required',
-                    'regex:/^(\+?\d{1,3}[- ]?)?\d{10}$/'
                 ],
                 'role' =>[
                     'required',
@@ -344,7 +337,8 @@ class participantsController extends Controller
                 ], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
             $data = $validator->validated();
-            $data['password'] = bcrypt($request->password);
+            $data['name'] = explode('@', $request->email)[0];
+            $data['password'] = bcrypt($data['name']);
             $user = User::create($data);
             return response()->json([
                 'metadata' => $user,
@@ -363,6 +357,99 @@ class participantsController extends Controller
                 ? $e->getStatusCode()
                 : 500);
         }
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/importUser",
+     *     summary="Nhập danh sách người dùng từ tệp Excel",
+     *     tags={"Participants"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Tệp Excel chứa danh sách người dùng",
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(
+     *                     property="listUser",
+     *                     description="Tệp Excel",
+     *                     type="file",
+     *                 ),
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Nhập danh sách người dùng thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", description="Thông điệp thành công"),
+     *             @OA\Property(property="status", type="string", description="Trạng thái"),
+     *             @OA\Property(property="statusCode", type="integer", description="Mã trạng thái HTTP"),
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="Yêu cầu phải là quản trị viên hoặc nhân viên",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", description="Thông điệp lỗi"),
+     *             @OA\Property(property="status", type="string", description="Trạng thái"),
+     *             @OA\Property(property="statusCode", type="integer", description="Mã trạng thái HTTP"),
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Lỗi server",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", description="Thông điệp lỗi"),
+     *             @OA\Property(property="status", type="string", description="Trạng thái"),
+     *             @OA\Property(property="statusCode", type="integer", description="Mã trạng thái HTTP"),
+     *         )
+     *     )
+     * )
+     */
+
+    public function importUser(Request $request){
+        try{
+            if(auth()->user()->role == 0){
+                return response()->json([
+                    'message' => 'Yêu cầu phải là quản trị viên hoặc nhân viên',
+                    'status' => 'error',
+                    'statusCode' => Response::HTTP_CONFLICT
+                ], Response::HTTP_CONFLICT);
+            }
+            $List = Excel::toArray([],$request->file('listUser'));
+            $dataImport = [];
+            for ($i = 1; $i < count($List[0]); $i++){
+                if(!empty($List[0][$i][0])){
+                    $dataHandle = explode('@', $List[0][$i][0])[0];
+                    $dataImport[] = [
+                        'name' => $dataHandle,
+                        'email' => $List[0][$i][0],
+                        'role' => $List[0][$i][1] == null ? 0 : $List[0][$i][1],
+                        'password' => bcrypt($dataHandle),
+                        'created_at' => now()
+                    ];
+                }
+            }
+//            dd($dataImport);
+            DB::table('users')->insert($dataImport);
+            return response()->json([
+                'message' => 'Nhập Danh sách người dùng thành công',
+                'status' => 'success',
+                'statusCode' => Response::HTTP_OK
+            ], Response::HTTP_OK);
+        }catch(\Exception $e){
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => 'error',
+                'statusCode' => $e instanceof HttpException
+                    ? $e->getStatusCode()
+                    : 500 // Internal Server Error by default
+            ], $e instanceof HttpException
+                ? $e->getStatusCode()
+                : 500);
+        }
+
     }
 
 /**
@@ -522,19 +609,14 @@ class participantsController extends Controller
 
         //Validate cho request
         $validator = Validator::make($request->all(), [
-            'name' => [
-                'required'
-            ],
             'email' => [
-                'required',
                 'regex:~^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$~'
             ],
             'phone' => [
-                'required',
                 'regex:/^(\+?\d{1,3}[- ]?)?\d{10}$/'
             ],
             'role' =>[
-                'required'
+                Rule::in([0,1,2])
             ]
         ], [
             'name.required' => 'Không để trống name của người dùng',
@@ -578,7 +660,8 @@ class participantsController extends Controller
             ], Response::HTTP_CONFLICT);
         }
         if($canUpdate == true){
-            $user->update($request->all());
+            $data = $request->only(['name', 'email', 'phone', 'role']);;
+            $user->update($data);
         }
         return response()->json([
             'metadata' => $user,
