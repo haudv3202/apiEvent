@@ -72,56 +72,56 @@ class GoogleController extends Controller
         }
     }
 
- /**
- * @OA\Get(
- *      path="/api/auth/google",
- *      operationId="googleAuth",
- *      tags={"Authentication"},
- *      summary="Authenticate with Google",
- *      description="Authenticate with Google and get an access token.",
- *      @OA\RequestBody(
- *          required=true,
- *          @OA\MediaType(
- *              mediaType="application/json",
- *              @OA\Schema(
- *                  @OA\Property(
- *                      property="Authorization",
- *                      type="string",
- *                      example="Bearer YOUR_GOOGLE_TOKEN"
- *                  ),
- *              ),
- *          ),
- *      ),
- *      @OA\Response(
- *          response=200,
- *          description="Successful operation",
- *          @OA\JsonContent(
- *              @OA\Property(property="metadata", type="object"),
- *              @OA\Property(property="message", type="string"),
- *              @OA\Property(property="status", type="string"),
- *              @OA\Property(property="statusCode", type="integer"),
- *          ),
- *      ),
- *      @OA\Response(
- *          response=400,
- *          description="Bad request",
- *          @OA\JsonContent(
- *              @OA\Property(property="status", type="string"),
- *              @OA\Property(property="message", type="string"),
- *              @OA\Property(property="statusCode", type="integer"),
- *          ),
- *      ),
- *      @OA\Response(
- *          response=401,
- *          description="Unauthorized",
- *          @OA\JsonContent(
- *              @OA\Property(property="status", type="string"),
- *              @OA\Property(property="message", type="string"),
- *              @OA\Property(property="statusCode", type="integer"),
- *          ),
- *      ),
- * )
- */
+// /**
+// * @OA\Get(
+// *      path="/api/auth/google",
+// *      operationId="googleAuth",
+// *      tags={"Authentication"},
+// *      summary="Authenticate with Google",
+// *      description="Authenticate with Google and get an access token.",
+// *      @OA\RequestBody(
+// *          required=true,
+// *          @OA\MediaType(
+// *              mediaType="application/json",
+// *              @OA\Schema(
+// *                  @OA\Property(
+// *                      property="Authorization",
+// *                      type="string",
+// *                      example="Bearer YOUR_GOOGLE_TOKEN"
+// *                  ),
+// *              ),
+// *          ),
+// *      ),
+// *      @OA\Response(
+// *          response=200,
+// *          description="Successful operation",
+// *          @OA\JsonContent(
+// *              @OA\Property(property="metadata", type="object"),
+// *              @OA\Property(property="message", type="string"),
+// *              @OA\Property(property="status", type="string"),
+// *              @OA\Property(property="statusCode", type="integer"),
+// *          ),
+// *      ),
+// *      @OA\Response(
+// *          response=400,
+// *          description="Bad request",
+// *          @OA\JsonContent(
+// *              @OA\Property(property="status", type="string"),
+// *              @OA\Property(property="message", type="string"),
+// *              @OA\Property(property="statusCode", type="integer"),
+// *          ),
+// *      ),
+// *      @OA\Response(
+// *          response=401,
+// *          description="Unauthorized",
+// *          @OA\JsonContent(
+// *              @OA\Property(property="status", type="string"),
+// *              @OA\Property(property="message", type="string"),
+// *              @OA\Property(property="statusCode", type="integer"),
+// *          ),
+// *      ),
+// * )
+// */
     public function loginCallback(Request $request)
     {
         try {
