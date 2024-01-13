@@ -122,13 +122,13 @@
                 }
             }
         },
-        "/api/send-mail": {
+        "/api/reset-password": {
             "post": {
                 "tags": [
                     "Authentication"
                 ],
                 "summary": "Send password reset email",
-                "operationId": "de62991d04d1655bd6c379155eb76259",
+                "operationId": "a632d843f6ab6602c68b84651d259694",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -198,14 +198,14 @@
                 }
             }
         },
-        "/api/reset/{token}": {
+        "/api/reset-password/{token}": {
             "put": {
                 "tags": [
                     "Authentication"
                 ],
                 "summary": "Reset password",
                 "description": "\n     *      - token là mã được gửi về email address của người dùng.\n     *     - password là mật khẩu mới của người dùng.\n     *     ",
-                "operationId": "545a36724062a279680a9077ca78afd5",
+                "operationId": "7d65a469943e590915dd51a3a13adf91",
                 "parameters": [
                     {
                         "name": "token",

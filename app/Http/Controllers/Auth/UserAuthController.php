@@ -176,7 +176,7 @@ class UserAuthController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/send-mail",
+     *     path="/api/reset-password",
      *     summary="Send password reset email",
      *     tags={"Authentication"},
      *     @OA\RequestBody(
@@ -232,7 +232,7 @@ class UserAuthController extends Controller
     }
     /**
      * @OA\Put(
-     *     path="/api/reset/{token}",
+     *     path="/api/reset-password/{token}",
      *     summary="Reset password",
      *     tags={"Authentication"},
      *     description="
