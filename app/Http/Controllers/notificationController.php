@@ -106,12 +106,12 @@ class notificationController extends Controller
             $page = $request->query('page', 1);
             $limit = $request->query('limit', 10);
             $status = $request->query('pagination', false);
-            $query = notification::with(['event', 'create_by','userJoin.user']);
+            $query = notification::with(['event', 'create_by', 'userJoin.user']);
             $notification = ($status) ? $query->get() : $query->paginate($limit, ['*'], 'page', $page);
             if ($page > $notification->lastPage()) {
                 $page = 1;
 //                with('user_receiver')->
-                $notification = notification::with(['event', 'create_by','userJoin.user'])->paginate($limit, ['*'], 'page', $page);
+                $notification = notification::with(['event', 'create_by', 'userJoin.user'])->paginate($limit, ['*'], 'page', $page);
             }
             return response()->json(handleData($status, $notification), Response::HTTP_OK);
         } catch (\Exception $e) {
@@ -122,6 +122,312 @@ class notificationController extends Controller
             ], Response::HTTP_NOT_FOUND);
         }
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/notification/search",
+     *     summary="Tìm kiếm thông báo",
+     *     tags={"notification"},
+     *     description="
+     * - Tìm kiếm thông báo dựa trên các thông số khác nhau.
+     * - Vai trò: Quản trị viên và Nhân viên.
+     *      - Tùy chọn có sẵn:
+     * - `page=<page_number>`: Chuyển sang trang được chỉ định.
+     * - `limit=<record_count>`: Số lượng bản ghi trên một trang.
+     * - `pagination=true|false`: Bật hoặc tắt phân trang (mặc định là false).
+     * - `type=<all|sent|deleted|scheduled>`: Loại thông báo.
+     * - `sender=<sender_id>`: ID của người gửi.
+     * - `title=<notification_title>`: Tiêu đề của thông báo.
+     * - `from_date=<start_date>`: Ngày bắt đầu tìm kiếm.
+     * - `to_date=<end_date>`: Ngày kết thúc tìm kiếm (mặc định là ngày hiện tại).
+     *     ",
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         schema={"type"="integer"},
+     *         description="Page number"
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="message", type="string", example="Successfully retrieved search results"),
+     *             @OA\Property(
+     *                 property="metadata",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="title", type="string", example="Nhắc nhở email"),
+     *                 @OA\Property(property="content", type="string", example="<h1 style='color:red;'>Test message</h1>"),
+     *                 @OA\Property(property="time_send", type="string", format="date-time", example="2023-11-25 01:42:27"),
+     *                 @OA\Property(property="sent_at", type="string", format="date-time", example="2023-11-25 01:50:33"),
+     *                 @OA\Property(property="status", type="integer", example=2),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-28 11:00:00"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-28 11:30:00")
+     *             ),
+     *             @OA\Property(property="totalDocs", type="integer", example=16),
+     *             @OA\Property(property="limit", type="integer", example=10),
+     *             @OA\Property(property="totalPages", type="integer", example=2),
+     *             @OA\Property(property="page", type="integer", example=2),
+     *             @OA\Property(property="pagingCounter", type="integer", example=2),
+     *             @OA\Property(property="hasPrevPage", type="boolean", example=true),
+     *             @OA\Property(property="hasNextPage", type="boolean", example=false)
+     *         )
+     *     ),
+     * @OA\Response(
+     *         response=404,
+     *         description="Record not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="error"),
+     *             @OA\Property(property="message", type="string", example="Record not found"),
+     *             @OA\Property(property="statusCode", type="integer", example=404)
+     *         )
+     *     ),
+     * @OA\Response(
+     *         response=500,
+     *         description="System error",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="error"),
+     *             @OA\Property(property="message", type="string", example="System error"),
+     *             @OA\Property(property="statusCode", type="integer", example=500)
+     *         )
+     *     )
+     * )
+     */
+
+    public function search(Request $request)
+    {
+        try {
+            if (Auth::user()->role == 0) {
+                return response([
+                    "status" => "error",
+                    "message" => "Role người Get không hợp lệ.Vui lòng thử lại!!",
+                    'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+            $page = $request->query('page', 1);
+            $limit = $request->query('limit', 10);
+            $status = $request->query('pagination', false);
+            // Bắt đầu xây dựng query
+            $query = notification::with(['event', 'create_by', 'userJoin.user']);
+
+// Tìm kiếm theo type
+            $type = $request->query('type', 'all');
+
+// Tìm kiếm theo sender (người tạo thông báo)
+            $sender = $request->query('sender');
+            if ($sender) {
+
+                $query->where('user_id', $sender);
+            }
+
+// Tìm kiếm theo title (tiêu đề thông báo)
+            $title = $request->query('title');
+            if ($title) {
+                $query->where('title', 'like', '%' . $title . '%');
+            }
+
+// Tìm kiếm theo from_date và to_date
+            $fromDate = $request->query('from_date');
+            $toDate = $request->query('to_date', now()->toDateString());
+
+            if ($fromDate) {
+
+                $query->where('sent_at', '>=', $fromDate);
+
+                if ($toDate) {
+                    $query->where('sent_at', '<=', $toDate);
+                }
+            }
+
+//            dd($query->toSql());
+
+            $notificationSearch = getNotifications($query, $status, $type, $limit, $page);;
+            if ($page > $notificationSearch->lastPage()) {
+                $page = 1;
+//                with('user_receiver')->
+                $notificationSearch = notification::with(['event', 'create_by', 'userJoin.user'])->paginate($limit, ['*'], 'page', $page);
+            }
+            return response()->json(handleData($status, $notificationSearch), Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => 'error',
+                'statusCode' => Response::HTTP_NOT_FOUND
+            ], Response::HTTP_NOT_FOUND);
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/notification/getNotificationDel/{id}",
+     *     summary="Hiển thị thông báo đã xóa",
+     *     tags={"notification"},
+     *     description="
+     * - Hiển thị thông tin về thông báo đã xóa mềm.
+     * - Vai trò: Quản trị viên và Nhân viên.
+     *     ",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         schema={"type"="integer"},
+     *         description="ID of the deleted notification",
+     *         required=true
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="message", type="string", example="Retrieve deleted notification successful"),
+     *             @OA\Property(
+     *                 property="metadata",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="title", type="string", example="Nhắc nhở email"),
+     *                 @OA\Property(property="content", type="string", example="<h1 style='color:red;'>Test message</h1>"),
+     *                 @OA\Property(property="time_send", type="string", format="date-time", example="2023-11-25 01:42:27"),
+     *                 @OA\Property(property="sent_at", type="string", format="date-time", example="2023-11-25 01:50:33"),
+     *                 @OA\Property(property="status", type="integer", example=2),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-28 11:00:00"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-28 11:30:00")
+     *                 ),
+     *                @OA\Property(property="totalDocs", type="integer", example=16),
+     *             @OA\Property(property="limit", type="integer", example=10),
+     *             @OA\Property(property="totalPages", type="integer", example=2),
+     *             @OA\Property(property="page", type="integer", example=2),
+     *             @OA\Property(property="pagingCounter", type="integer", example=2),
+     *             @OA\Property(property="hasPrevPage", type="boolean", example=true),
+     *             @OA\Property(property="hasNextPage", type="boolean", example=false)
+     *             )
+     *         )
+     *     ),
+     * @OA\Response(
+     *         response=404,
+     *         description="Record not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="error"),
+     *             @OA\Property(property="message", type="string", example="Record not found"),
+     *             @OA\Property(property="statusCode", type="integer", example=404)
+     *         )
+     *     ),
+     * @OA\Response(
+     *         response=500,
+     *         description="System error",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="error"),
+     *             @OA\Property(property="message", type="string", example="System error"),
+     *             @OA\Property(property="statusCode", type="integer", example=500)
+     *         )
+     *     )
+     * )
+     */
+    public function showNotificationDel($id)
+    {
+        try {
+            if (Auth::user()->role == 0) {
+                return response([
+                    "status" => "error",
+                    "message" => "Role người Get không hợp lệ.Vui lòng thử lại!!",
+                    'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+            $notification = notification::onlyTrashed()->where('id', $id)->get();
+            return response()->json([
+                'metadata' => $notification,
+                'message' => 'Lấy thông báo đã xóa thành công',
+                'status' => 'success',
+                'statusCode' => Response::HTTP_OK
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => 'error',
+                'statusCode' => Response::HTTP_NOT_FOUND
+            ], Response::HTTP_NOT_FOUND);
+        }
+    }
+    /**
+     * @OA\Get(
+     *     path="/api/notification/restore/{id}",
+     *     summary="Khôi phục thông báo đã xóa",
+     *     tags={"notification"},
+     *     description="
+     * - Khôi phục thông báo đã xóa trước đó.
+     * - Vai trò: Quản trị viên và Nhân viên.
+     *     ",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         schema={"type"="integer"},
+     *         description="ID of the deleted notification to be restored",
+     *         required=true
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="message", type="string", example="Successfully restored deleted notification"),
+     *             @OA\Property(property="statusCode", type="integer", example=200)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Notification not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="error"),
+     *             @OA\Property(property="message", type="string", example="Notification not found"),
+     *             @OA\Property(property="statusCode", type="integer", example=404)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="System error",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="error"),
+     *             @OA\Property(property="message", type="string", example="System error"),
+     *             @OA\Property(property="statusCode", type="integer", example=500)
+     *         )
+     *     )
+     * )
+     */
+    public function restoreNotificationDel($id)
+    {
+        try {
+            if (Auth::user()->role == 0) {
+                return response([
+                    "status" => "error",
+                    "message" => "Role người Get không hợp lệ.Vui lòng thử lại!!",
+                    'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+            $notification = notification::onlyTrashed()->where('id', $id)->restore();
+            return response()->json([
+                'message' => 'Khôi phục thông báo đã xóa thành công',
+                'status' => 'success',
+                'statusCode' => Response::HTTP_OK
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => 'error',
+                'statusCode' => Response::HTTP_NOT_FOUND
+            ], Response::HTTP_NOT_FOUND);
+        }
+    }
+
     /**
      * @OA\Get(
      *     path="/api/notification/settings/{id}",
@@ -216,7 +522,7 @@ class notificationController extends Controller
             $limit = $request->query('limit', 10);
             $status = $request->query('pagination', false);
             $type = $request->query('type', 'all');
-            $query = notification::with(['event', 'create_by','userJoin.user'])->where('user_id', $id);
+            $query = notification::with(['event', 'create_by', 'userJoin.user'])->where('user_id', $id);
 
 //            $notification = ($status) ? $query->withTrashed()->get() : $query->withTrashed()->paginate($limit, ['*'], 'page', $page);
             $notification = getNotifications($query, $status, $type, $limit, $page);
@@ -249,7 +555,7 @@ class notificationController extends Controller
         $dateCr = $currentDateTime->toDateTimeString();
         $fiveHoursAhead = $currentDateTime->addHours(12)->toDateTimeString();
         $events = event::where('start_time', '>=', $dateCr)
-            ->with(['attendances.user', 'user','notifications' => function($query) use ($fiveHoursAhead)    {
+            ->with(['attendances.user', 'user', 'notifications' => function ($query) use ($fiveHoursAhead) {
                 $query->where('time_send', '<', $fiveHoursAhead);
             }])
             ->where('start_time', '<', $fiveHoursAhead)
@@ -420,7 +726,7 @@ class notificationController extends Controller
                 'user_id' => $user->id
             ]);
 //            with('user_receiver')->
-            $notification = notification::with(['event', 'create_by','userJoin.user'])->get();
+            $notification = notification::with(['event', 'create_by', 'userJoin.user'])->get();
             return response()->json([
                 'metadata' => $notification,
                 'message' => 'Tạo thông báo thành công',
@@ -590,7 +896,7 @@ class notificationController extends Controller
     {
         try {
 //            with('user_receiver')->
-            $notification = notification::with(['event', 'create_by','userJoin.user'])->find($id);
+            $notification = notification::with(['event', 'create_by', 'userJoin.user'])->find($id);
             return response()->json([
                 'metadata' => $notification,
                 'message' => 'Lấy 1 bản ghi thành công',
@@ -740,7 +1046,7 @@ class notificationController extends Controller
             $data['updated_at'] = Carbon::now();
             $notification->update($data);
 //            with('user_receiver')->
-            $notification = notification::with(['event', 'create_by','userJoin.user'])->get();
+            $notification = notification::with(['event', 'create_by', 'userJoin.user'])->get();
             return response()->json([
                 'metadata' => $notification,
                 'message' => 'Cập nhật thông báo thành công',
@@ -825,7 +1131,7 @@ class notificationController extends Controller
     public function destroy($id, Request $request)
     {
         try {
-            $notification = notification::find($id);
+            $notification = notification::withTrashed()->find($id);
             $softDel = $request->query('softDel', true);
             if (!$notification) {
                 return response()->json([
@@ -856,7 +1162,7 @@ class notificationController extends Controller
             }
 
 //            with('user_receiver')->
-            $notification = notification::with(['event', 'create_by','userJoin.user'])->get();
+            $notification = notification::with(['event', 'create_by', 'userJoin.user'])->get();
             return response()->json([
                 'metadata' => $notification,
                 'message' => 'Xóa bản ghi thành công',

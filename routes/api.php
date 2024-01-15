@@ -58,6 +58,9 @@ Route::middleware('auth:api')->prefix('notification')->group(function() {
     Route::post('/send',[notificationController::class,'create']);
 //    Route::get('/test',[notificationController::class,'test']);
     Route::get('/',[notificationController::class,'index']);
+    Route::get('/search',[notificationController::class,'search']);
+    Route::get('/getNotificationDel/{id}',[notificationController::class,'showNotificationDel']);
+    Route::get('/restore/{id}',[notificationController::class,'restoreNotificationDel']);
     Route::get('/settings/{id}',[notificationController::class,'getSettingsNotification']);
     Route::post('/',[notificationController::class,'store']);
     Route::get('/show/{id}',[notificationController::class,'show']);

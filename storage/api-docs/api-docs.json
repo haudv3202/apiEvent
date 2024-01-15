@@ -5757,6 +5757,425 @@
                 }
             }
         },
+        "/api/notification/search": {
+            "get": {
+                "tags": [
+                    "notification"
+                ],
+                "summary": "Tìm kiếm thông báo",
+                "description": "\n     * - Tìm kiếm thông báo dựa trên các thông số khác nhau.\n     * - Vai trò: Quản trị viên và Nhân viên.\n     *      - Tùy chọn có sẵn:\n     * - `page=<page_number>`: Chuyển sang trang được chỉ định.\n     * - `limit=<record_count>`: Số lượng bản ghi trên một trang.\n     * - `pagination=true|false`: Bật hoặc tắt phân trang (mặc định là false).\n     * - `type=<all|sent|deleted|scheduled>`: Loại thông báo.\n     * - `sender=<sender_id>`: ID của người gửi.\n     * - `title=<notification_title>`: Tiêu đề của thông báo.\n     * - `from_date=<start_date>`: Ngày bắt đầu tìm kiếm.\n     * - `to_date=<end_date>`: Ngày kết thúc tìm kiếm (mặc định là ngày hiện tại).\n     *     ",
+                "operationId": "dee2f85541d667396d1f9a39152b7039",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Successfully retrieved search results"
+                                        },
+                                        "metadata": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Nhắc nhở email"
+                                                },
+                                                "content": {
+                                                    "type": "string",
+                                                    "example": "<h1 style='color:red;'>Test message</h1>"
+                                                },
+                                                "time_send": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-11-25 01:42:27"
+                                                },
+                                                "sent_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-11-25 01:50:33"
+                                                },
+                                                "status": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-11-28 11:00:00"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-11-28 11:30:00"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "totalDocs": {
+                                            "type": "integer",
+                                            "example": 16
+                                        },
+                                        "limit": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "totalPages": {
+                                            "type": "integer",
+                                            "example": 2
+                                        },
+                                        "page": {
+                                            "type": "integer",
+                                            "example": 2
+                                        },
+                                        "pagingCounter": {
+                                            "type": "integer",
+                                            "example": 2
+                                        },
+                                        "hasPrevPage": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "hasNextPage": {
+                                            "type": "boolean",
+                                            "example": false
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Record not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Record not found"
+                                        },
+                                        "statusCode": {
+                                            "type": "integer",
+                                            "example": 404
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "System error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "System error"
+                                        },
+                                        "statusCode": {
+                                            "type": "integer",
+                                            "example": 500
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/notification/getNotificationDel/{id}": {
+            "get": {
+                "tags": [
+                    "notification"
+                ],
+                "summary": "Hiển thị thông báo đã xóa",
+                "description": "\n     * - Hiển thị thông tin về thông báo đã xóa mềm.\n     * - Vai trò: Quản trị viên và Nhân viên.\n     *     ",
+                "operationId": "e3a6f117ee9a480603cb071619f8f930",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the deleted notification",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Retrieve deleted notification successful"
+                                        },
+                                        "metadata": {
+                                            "properties": {
+                                                "totalDocs": {
+                                                    "type": "integer",
+                                                    "example": 16
+                                                },
+                                                "limit": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "page": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "pagingCounter": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "hasPrevPage": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "hasNextPage": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                }
+                                            },
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Nhắc nhở email"
+                                                    },
+                                                    "content": {
+                                                        "type": "string",
+                                                        "example": "<h1 style='color:red;'>Test message</h1>"
+                                                    },
+                                                    "time_send": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2023-11-25 01:42:27"
+                                                    },
+                                                    "sent_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2023-11-25 01:50:33"
+                                                    },
+                                                    "status": {
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2023-11-28 11:00:00"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2023-11-28 11:30:00"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Record not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Record not found"
+                                        },
+                                        "statusCode": {
+                                            "type": "integer",
+                                            "example": 404
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "System error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "System error"
+                                        },
+                                        "statusCode": {
+                                            "type": "integer",
+                                            "example": 500
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/notification/restore/{id}": {
+            "get": {
+                "tags": [
+                    "notification"
+                ],
+                "summary": "Khôi phục thông báo đã xóa",
+                "description": "\n     * - Khôi phục thông báo đã xóa trước đó.\n     * - Vai trò: Quản trị viên và Nhân viên.\n     *     ",
+                "operationId": "7121269aba6949dd5e7dee37b3323f43",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the deleted notification to be restored",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Successfully restored deleted notification"
+                                        },
+                                        "statusCode": {
+                                            "type": "integer",
+                                            "example": 200
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Notification not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Notification not found"
+                                        },
+                                        "statusCode": {
+                                            "type": "integer",
+                                            "example": 404
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "System error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "System error"
+                                        },
+                                        "statusCode": {
+                                            "type": "integer",
+                                            "example": 500
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/notification/settings/{id}": {
             "get": {
                 "tags": [
