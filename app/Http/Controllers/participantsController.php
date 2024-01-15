@@ -413,18 +413,19 @@ class participantsController extends Controller
             $List = Excel::toArray([],$request->file('listUser'));
             $dataImport = [];
             for ($i = 1; $i < count($List[0]); $i++){
-                if(!empty($List[0][$i][0])){
+                if(!empty($List[0][$i][0]) && !empty($List[0][$i][2]) && !empty($List[0][$i][3])){
                     $dataHandle = explode('@', $List[0][$i][0])[0];
                     $dataImport[] = [
                         'name' => $dataHandle,
                         'email' => $List[0][$i][0],
                         'role' => $List[0][$i][1] == null ? 0 : $List[0][$i][1],
+                        'phone' => '0' . $List[0][$i][3],
+                        'student_code' => $List[0][$i][2],
                         'password' => bcrypt($dataHandle),
                         'created_at' => now()
                     ];
                 }
             }
-//            dd($dataImport);
             DB::table('users')->insert($dataImport);
             return response()->json([
                 'message' => 'Nhập Danh sách người dùng thành công',
@@ -653,7 +654,7 @@ class participantsController extends Controller
             ], Response::HTTP_CONFLICT);
         }
         if($canUpdate == true){
-            $data = $request->only(['name', 'email', 'phone', 'role']);;
+            $data = $request->only(['name', 'email', 'phone', 'role','student_code']);;
             $user->update($data);
         }
         return response()->json([
