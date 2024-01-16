@@ -93,7 +93,7 @@ Route::prefix('event')->group(function() {
 
 //Test api in swagger donn't need token
 Route::apiResource('participants',participantsController::class)->middleware('auth:api');
-Route::patch('updateUser/{id}',[participantsController::class, 'updateUser'])->middleware('auth:api');
+Route::patch('updateUser',[participantsController::class, 'updateUser'])->middleware('auth:api');
 Route::post('importUser',[participantsController::class,'importUser'])->middleware('auth:api');
 Route::get('resourceByEventID/{event_id}',[resourceController::class,'GetRecordByEventId'])->middleware('auth:api');
 Route::apiResource('resource',resourceController::class)->middleware('auth:api');

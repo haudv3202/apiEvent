@@ -671,7 +671,7 @@ class participantsController extends Controller
 
     /**
      * @OA\Patch(
-     *     path="/api/updateUser/{id}",
+     *     path="/api/updateUser",
      *     summary="Cập nhật thông tin người dùng",
      *     description="Cập nhật chi tiết người dùng, bao gồm tên, email, điện thoại và hình đại diện. Mật khẩu có thể được cập nhật nếu được cung cấp.",
      *     operationId="updateUser",
@@ -732,9 +732,8 @@ class participantsController extends Controller
      * )
      */
 
-    public function updateUser(Request $request, $id)
+    public function updateUser(Request $request)
     {
-        $user = User::findOrFail($id);
         if (auth()->check()) {
             $logUserRole = auth()->user()->role;
         } else {
@@ -744,6 +743,7 @@ class participantsController extends Controller
                 'statusCode' => Response::HTTP_UNAUTHORIZED
             ], Response::HTTP_UNAUTHORIZED);
         }
+        $user = User::findOrFail(auth()->user()->id);
 
 
         //Validate cho request
