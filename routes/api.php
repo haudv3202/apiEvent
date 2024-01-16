@@ -58,7 +58,7 @@ Route::middleware('auth:api')->prefix('notification')->group(function() {
     Route::post('/send',[notificationController::class,'create']);
 //    Route::get('/test',[notificationController::class,'test']);
     Route::get('/',[notificationController::class,'index']);
-    Route::get('/search',[notificationController::class,'search']);
+//    Route::get('/search',[notificationController::class,'search']);
     Route::get('/getNotificationDel/{id}',[notificationController::class,'showNotificationDel']);
     Route::get('/restore/{id}',[notificationController::class,'restoreNotificationDel']);
     Route::get('/settings/{id}',[notificationController::class,'getSettingsNotification']);
@@ -93,6 +93,7 @@ Route::prefix('event')->group(function() {
 
 //Test api in swagger donn't need token
 Route::apiResource('participants',participantsController::class)->middleware('auth:api');
+Route::patch('updateUser/{id}',[participantsController::class, 'updateUser'])->middleware('auth:api');
 Route::post('importUser',[participantsController::class,'importUser'])->middleware('auth:api');
 Route::get('resourceByEventID/{event_id}',[resourceController::class,'GetRecordByEventId'])->middleware('auth:api');
 Route::apiResource('resource',resourceController::class)->middleware('auth:api');

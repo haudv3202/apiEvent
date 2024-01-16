@@ -5757,165 +5757,6 @@
                 }
             }
         },
-        "/api/notification/search": {
-            "get": {
-                "tags": [
-                    "notification"
-                ],
-                "summary": "Tìm kiếm thông báo",
-                "description": "\n     * - Tìm kiếm thông báo dựa trên các thông số khác nhau.\n     * - Vai trò: Quản trị viên và Nhân viên.\n     *      - Tùy chọn có sẵn:\n     * - `page=<page_number>`: Chuyển sang trang được chỉ định.\n     * - `limit=<record_count>`: Số lượng bản ghi trên một trang.\n     * - `pagination=true|false`: Bật hoặc tắt phân trang (mặc định là false).\n     * - `type=<all|sent|deleted|scheduled>`: Loại thông báo.\n     * - `sender=<sender_id>`: ID của người gửi.\n     * - `title=<notification_title>`: Tiêu đề của thông báo.\n     * - `from_date=<start_date>`: Ngày bắt đầu tìm kiếm.\n     * - `to_date=<end_date>`: Ngày kết thúc tìm kiếm (mặc định là ngày hiện tại).\n     *     ",
-                "operationId": "dee2f85541d667396d1f9a39152b7039",
-                "parameters": [
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "description": "Page number",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "success"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Successfully retrieved search results"
-                                        },
-                                        "metadata": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "title": {
-                                                    "type": "string",
-                                                    "example": "Nhắc nhở email"
-                                                },
-                                                "content": {
-                                                    "type": "string",
-                                                    "example": "<h1 style='color:red;'>Test message</h1>"
-                                                },
-                                                "time_send": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2023-11-25 01:42:27"
-                                                },
-                                                "sent_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2023-11-25 01:50:33"
-                                                },
-                                                "status": {
-                                                    "type": "integer",
-                                                    "example": 2
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2023-11-28 11:00:00"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2023-11-28 11:30:00"
-                                                }
-                                            },
-                                            "type": "object"
-                                        },
-                                        "totalDocs": {
-                                            "type": "integer",
-                                            "example": 16
-                                        },
-                                        "limit": {
-                                            "type": "integer",
-                                            "example": 10
-                                        },
-                                        "totalPages": {
-                                            "type": "integer",
-                                            "example": 2
-                                        },
-                                        "page": {
-                                            "type": "integer",
-                                            "example": 2
-                                        },
-                                        "pagingCounter": {
-                                            "type": "integer",
-                                            "example": 2
-                                        },
-                                        "hasPrevPage": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "hasNextPage": {
-                                            "type": "boolean",
-                                            "example": false
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Record not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "error"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Record not found"
-                                        },
-                                        "statusCode": {
-                                            "type": "integer",
-                                            "example": 404
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "System error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "error"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "System error"
-                                        },
-                                        "statusCode": {
-                                            "type": "integer",
-                                            "example": 500
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/api/notification/getNotificationDel/{id}": {
             "get": {
                 "tags": [
@@ -7067,7 +6908,7 @@
                     "Participants"
                 ],
                 "summary": "Tìm kiếm người dùng theo email hoặc số điện thoại",
-                "description": "\n * -Tìm kiếm theo post\n * -Request là email và phone\n * -email là email của người cần tìm, không cần nhập quá giống\n * -phone là số diện thoại của người cần tìm, không cần nhập quá giống\n * -Ta sẽ tìm kiếm theo SDT hoặc Email\n * -Role là tất cả các role\n *     - Sẽ có 1 số option param sau\n *     - page=<số trang> chuyển sang trang cần\n *     - limit=<số record> số record muốn lấy trong 1 trang\n *     - pagination=true|false sẽ là trạng thái phân trang hoặc không phân trang <mặc định là false phân trang>\n * ",
+                "description": "\n     * -Tìm kiếm theo post\n     * -Request là email và phone\n     * -email là email của người cần tìm, không cần nhập quá giống\n     * -phone là số diện thoại của người cần tìm, không cần nhập quá giống\n     * -Ta sẽ tìm kiếm theo SDT hoặc Email\n     * -Role là tất cả các role\n     *     - Sẽ có 1 số option param sau\n     *     - page=<số trang> chuyển sang trang cần\n     *     - limit=<số record> số record muốn lấy trong 1 trang\n     *     - pagination=true|false sẽ là trạng thái phân trang hoặc không phân trang <mặc định là false phân trang>\n     * ",
                 "operationId": "getUserByEmailAndPhone",
                 "requestBody": {
                     "required": true,
@@ -7331,7 +7172,7 @@
                     "Participants"
                 ],
                 "summary": "Lấy dữ liệu người dùng theo id cho trước",
-                "description": "\n * -Endpoint trả về một người dùng theo id cho trước\n * id là id của người dùng",
+                "description": "\n     * -Endpoint trả về một người dùng theo id cho trước\n     * id là id của người dùng",
                 "operationId": "getParticipantsById",
                 "parameters": [
                     {
@@ -7440,7 +7281,100 @@
                     }
                 }
             },
-            "put": {
+            "delete": {
+                "tags": [
+                    "Participants"
+                ],
+                "summary": "Xóa 1 bản ghi người dùng",
+                "description": "\n     * - id là id của người dùng\n     * - Role xóa chỉ có thể là quản lí\n     * ",
+                "operationId": "ec6365c5f315ce8381da73eafdc5ccb3",
+                "parameters": [
+                    {
+                        "name": "participants",
+                        "in": "path",
+                        "description": "Mô hình dữ liệu người dùng",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Xóa bản ghi thành công"
+                                        },
+                                        "statusCode": {
+                                            "type": "integer",
+                                            "example": 200
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Record not exists",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Bản ghi không tồn tại"
+                                        },
+                                        "statusCode": {
+                                            "type": "integer",
+                                            "example": 404
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Lỗi server",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Lỗi server"
+                                        },
+                                        "statusCode": {
+                                            "type": "integer",
+                                            "example": 500
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
                 "tags": [
                     "Participants"
                 ],
@@ -7581,43 +7515,81 @@
                         }
                     }
                 }
-            },
-            "delete": {
+            }
+        },
+        "/api/updateUser/{id}": {
+            "patch": {
                 "tags": [
                     "Participants"
                 ],
-                "summary": "Xóa 1 bản ghi người dùng",
-                "description": "\n     * - id là id của người dùng\n     * - Role xóa chỉ có thể là quản lí\n     * ",
-                "operationId": "ec6365c5f315ce8381da73eafdc5ccb3",
+                "summary": "Cập nhật thông tin người dùng",
+                "description": "Cập nhật chi tiết người dùng, bao gồm tên, email, điện thoại và hình đại diện. Mật khẩu có thể được cập nhật nếu được cung cấp.",
+                "operationId": "updateUser",
                 "parameters": [
                     {
-                        "name": "participants",
+                        "name": "id",
                         "in": "path",
-                        "description": "Mô hình dữ liệu người dùng",
+                        "description": "ID of the user to update",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "format": "int64"
                         }
                     }
                 ],
+                "requestBody": {
+                    "description": "User details to be updated",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "format": "phone"
+                                    },
+                                    "avatar": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "Successful operation",
+                        "description": "User updated successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "success"
+                                        "metadata": {
+                                            "description": "Updated user details",
+                                            "type": "object"
                                         },
                                         "message": {
-                                            "type": "string",
-                                            "example": "Xóa bản ghi thành công"
+                                            "description": "Update successful message",
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "description": "Status of the response (success)",
+                                            "type": "string"
                                         },
                                         "statusCode": {
-                                            "type": "integer",
-                                            "example": 200
+                                            "description": "HTTP status code (200)",
+                                            "type": "integer"
                                         }
                                     },
                                     "type": "object"
@@ -7625,23 +7597,23 @@
                             }
                         }
                     },
-                    "404": {
-                        "description": "Record not exists",
+                    "401": {
+                        "description": "Unauthorized - Not logged in",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "status": {
-                                            "type": "string",
-                                            "example": "error"
+                                            "description": "Status of the response (error)",
+                                            "type": "string"
                                         },
                                         "message": {
-                                            "type": "string",
-                                            "example": "Bản ghi không tồn tại"
+                                            "description": "Unauthorized error message",
+                                            "type": "string"
                                         },
                                         "statusCode": {
-                                            "type": "integer",
-                                            "example": 404
+                                            "description": "HTTP status code (401)",
+                                            "type": "integer"
                                         }
                                     },
                                     "type": "object"
@@ -7650,22 +7622,25 @@
                         }
                     },
                     "500": {
-                        "description": "Lỗi server",
+                        "description": "Validation error or internal server error",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "status": {
-                                            "type": "string",
-                                            "example": "error"
+                                            "description": "Status of the response (error)",
+                                            "type": "string"
                                         },
                                         "message": {
-                                            "type": "string",
-                                            "example": "Lỗi server"
+                                            "description": "Validation error messages",
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
                                         },
                                         "statusCode": {
-                                            "type": "integer",
-                                            "example": 500
+                                            "description": "HTTP status code (500)",
+                                            "type": "integer"
                                         }
                                     },
                                     "type": "object"

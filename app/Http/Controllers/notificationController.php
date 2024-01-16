@@ -123,143 +123,143 @@ class notificationController extends Controller
         }
     }
 
-    /**
-     * @OA\Get(
-     *     path="/api/notification/search",
-     *     summary="Tìm kiếm thông báo",
-     *     tags={"notification"},
-     *     description="
-     * - Tìm kiếm thông báo dựa trên các thông số khác nhau.
-     * - Vai trò: Quản trị viên và Nhân viên.
-     *      - Tùy chọn có sẵn:
-     * - `page=<page_number>`: Chuyển sang trang được chỉ định.
-     * - `limit=<record_count>`: Số lượng bản ghi trên một trang.
-     * - `pagination=true|false`: Bật hoặc tắt phân trang (mặc định là false).
-     * - `type=<all|sent|deleted|scheduled>`: Loại thông báo.
-     * - `sender=<sender_id>`: ID của người gửi.
-     * - `title=<notification_title>`: Tiêu đề của thông báo.
-     * - `from_date=<start_date>`: Ngày bắt đầu tìm kiếm.
-     * - `to_date=<end_date>`: Ngày kết thúc tìm kiếm (mặc định là ngày hiện tại).
-     *     ",
-     *     @OA\Parameter(
-     *         name="page",
-     *         in="query",
-     *         schema={"type"="integer"},
-     *         description="Page number"
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Successful operation",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="status", type="string", example="success"),
-     *             @OA\Property(property="message", type="string", example="Successfully retrieved search results"),
-     *             @OA\Property(
-     *                 property="metadata",
-     *                 type="object",
-     *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="title", type="string", example="Nhắc nhở email"),
-     *                 @OA\Property(property="content", type="string", example="<h1 style='color:red;'>Test message</h1>"),
-     *                 @OA\Property(property="time_send", type="string", format="date-time", example="2023-11-25 01:42:27"),
-     *                 @OA\Property(property="sent_at", type="string", format="date-time", example="2023-11-25 01:50:33"),
-     *                 @OA\Property(property="status", type="integer", example=2),
-     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-28 11:00:00"),
-     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-28 11:30:00")
-     *             ),
-     *             @OA\Property(property="totalDocs", type="integer", example=16),
-     *             @OA\Property(property="limit", type="integer", example=10),
-     *             @OA\Property(property="totalPages", type="integer", example=2),
-     *             @OA\Property(property="page", type="integer", example=2),
-     *             @OA\Property(property="pagingCounter", type="integer", example=2),
-     *             @OA\Property(property="hasPrevPage", type="boolean", example=true),
-     *             @OA\Property(property="hasNextPage", type="boolean", example=false)
-     *         )
-     *     ),
-     * @OA\Response(
-     *         response=404,
-     *         description="Record not found",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="status", type="string", example="error"),
-     *             @OA\Property(property="message", type="string", example="Record not found"),
-     *             @OA\Property(property="statusCode", type="integer", example=404)
-     *         )
-     *     ),
-     * @OA\Response(
-     *         response=500,
-     *         description="System error",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="status", type="string", example="error"),
-     *             @OA\Property(property="message", type="string", example="System error"),
-     *             @OA\Property(property="statusCode", type="integer", example=500)
-     *         )
-     *     )
-     * )
-     */
+//    /**
+//     * @OA\Get(
+//     *     path="/api/notification/search",
+//     *     summary="Tìm kiếm thông báo",
+//     *     tags={"notification"},
+//     *     description="
+//     * - Tìm kiếm thông báo dựa trên các thông số khác nhau.
+//     * - Vai trò: Quản trị viên và Nhân viên.
+//     *      - Tùy chọn có sẵn:
+//     * - `page=<page_number>`: Chuyển sang trang được chỉ định.
+//     * - `limit=<record_count>`: Số lượng bản ghi trên một trang.
+//     * - `pagination=true|false`: Bật hoặc tắt phân trang (mặc định là false).
+//     * - `type=<all|sent|deleted|scheduled>`: Loại thông báo.
+//     * - `sender=<sender_id>`: ID của người gửi.
+//     * - `title=<notification_title>`: Tiêu đề của thông báo.
+//     * - `from_date=<start_date>`: Ngày bắt đầu tìm kiếm.
+//     * - `to_date=<end_date>`: Ngày kết thúc tìm kiếm (mặc định là ngày hiện tại).
+//     *     ",
+//     *     @OA\Parameter(
+//     *         name="page",
+//     *         in="query",
+//     *         schema={"type"="integer"},
+//     *         description="Page number"
+//     *     ),
+//     *     @OA\Response(
+//     *         response=200,
+//     *         description="Successful operation",
+//     *         @OA\JsonContent(
+//     *             type="object",
+//     *             @OA\Property(property="status", type="string", example="success"),
+//     *             @OA\Property(property="message", type="string", example="Successfully retrieved search results"),
+//     *             @OA\Property(
+//     *                 property="metadata",
+//     *                 type="object",
+//     *                 @OA\Property(property="id", type="integer", example=1),
+//     *                 @OA\Property(property="title", type="string", example="Nhắc nhở email"),
+//     *                 @OA\Property(property="content", type="string", example="<h1 style='color:red;'>Test message</h1>"),
+//     *                 @OA\Property(property="time_send", type="string", format="date-time", example="2023-11-25 01:42:27"),
+//     *                 @OA\Property(property="sent_at", type="string", format="date-time", example="2023-11-25 01:50:33"),
+//     *                 @OA\Property(property="status", type="integer", example=2),
+//     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-28 11:00:00"),
+//     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-28 11:30:00")
+//     *             ),
+//     *             @OA\Property(property="totalDocs", type="integer", example=16),
+//     *             @OA\Property(property="limit", type="integer", example=10),
+//     *             @OA\Property(property="totalPages", type="integer", example=2),
+//     *             @OA\Property(property="page", type="integer", example=2),
+//     *             @OA\Property(property="pagingCounter", type="integer", example=2),
+//     *             @OA\Property(property="hasPrevPage", type="boolean", example=true),
+//     *             @OA\Property(property="hasNextPage", type="boolean", example=false)
+//     *         )
+//     *     ),
+//     * @OA\Response(
+//     *         response=404,
+//     *         description="Record not found",
+//     *         @OA\JsonContent(
+//     *             type="object",
+//     *             @OA\Property(property="status", type="string", example="error"),
+//     *             @OA\Property(property="message", type="string", example="Record not found"),
+//     *             @OA\Property(property="statusCode", type="integer", example=404)
+//     *         )
+//     *     ),
+//     * @OA\Response(
+//     *         response=500,
+//     *         description="System error",
+//     *         @OA\JsonContent(
+//     *             type="object",
+//     *             @OA\Property(property="status", type="string", example="error"),
+//     *             @OA\Property(property="message", type="string", example="System error"),
+//     *             @OA\Property(property="statusCode", type="integer", example=500)
+//     *         )
+//     *     )
+//     * )
+//     */
 
-    public function search(Request $request)
-    {
-        try {
-            if (Auth::user()->role == 0) {
-                return response([
-                    "status" => "error",
-                    "message" => "Role người Get không hợp lệ.Vui lòng thử lại!!",
-                    'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR
-                ], Response::HTTP_INTERNAL_SERVER_ERROR);
-            }
-            $page = $request->query('page', 1);
-            $limit = $request->query('limit', 10);
-            $status = $request->query('pagination', false);
-            // Bắt đầu xây dựng query
-            $query = notification::with(['event', 'create_by', 'userJoin.user']);
-
-// Tìm kiếm theo type
-            $type = $request->query('type', 'all');
-
-// Tìm kiếm theo sender (người tạo thông báo)
-            $sender = $request->query('sender');
-            if ($sender) {
-
-                $query->where('user_id', $sender);
-            }
-
-// Tìm kiếm theo title (tiêu đề thông báo)
-            $title = $request->query('title');
-            if ($title) {
-                $query->where('title', 'like', '%' . $title . '%');
-            }
-
-// Tìm kiếm theo from_date và to_date
-            $fromDate = $request->query('from_date');
-            $toDate = $request->query('to_date', now()->toDateString());
-
-            if ($fromDate) {
-
-                $query->where('sent_at', '>=', $fromDate);
-
-                if ($toDate) {
-                    $query->where('sent_at', '<=', $toDate);
-                }
-            }
-
-//            dd($query->toSql());
-
-            $notificationSearch = getNotifications($query, $status, $type, $limit, $page);;
-            if ($page > $notificationSearch->lastPage()) {
-                $page = 1;
-//                with('user_receiver')->
-                $notificationSearch = notification::with(['event', 'create_by', 'userJoin.user'])->paginate($limit, ['*'], 'page', $page);
-            }
-            return response()->json(handleData($status, $notificationSearch), Response::HTTP_OK);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => $e->getMessage(),
-                'status' => 'error',
-                'statusCode' => Response::HTTP_NOT_FOUND
-            ], Response::HTTP_NOT_FOUND);
-        }
-    }
+//    public function search(Request $request)
+//    {
+//        try {
+//            if (Auth::user()->role == 0) {
+//                return response([
+//                    "status" => "error",
+//                    "message" => "Role người Get không hợp lệ.Vui lòng thử lại!!",
+//                    'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR
+//                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+//            }
+//            $page = $request->query('page', 1);
+//            $limit = $request->query('limit', 10);
+//            $status = $request->query('pagination', false);
+//            // Bắt đầu xây dựng query
+//            $query = notification::with(['event', 'create_by', 'userJoin.user']);
+//
+//// Tìm kiếm theo type
+//            $type = $request->query('type', 'all');
+//
+//// Tìm kiếm theo sender (người tạo thông báo)
+//            $sender = $request->query('sender');
+//            if ($sender) {
+//
+//                $query->where('user_id', $sender);
+//            }
+//
+//// Tìm kiếm theo title (tiêu đề thông báo)
+//            $title = $request->query('title');
+//            if ($title) {
+//                $query->where('title', 'like', '%' . $title . '%');
+//            }
+//
+//// Tìm kiếm theo from_date và to_date
+//            $fromDate = $request->query('from_date');
+//            $toDate = $request->query('to_date', now()->toDateString());
+//
+//            if ($fromDate) {
+//
+//                $query->where('sent_at', '>=', $fromDate);
+//
+//                if ($toDate) {
+//                    $query->where('sent_at', '<=', $toDate);
+//                }
+//            }
+//
+////            dd($query->toSql());
+//
+//            $notificationSearch = getNotifications($query, $status, $type, $limit, $page);;
+//            if ($page > $notificationSearch->lastPage()) {
+//                $page = 1;
+////                with('user_receiver')->
+//                $notificationSearch = notification::with(['event', 'create_by', 'userJoin.user'])->paginate($limit, ['*'], 'page', $page);
+//            }
+//            return response()->json(handleData($status, $notificationSearch), Response::HTTP_OK);
+//        } catch (\Exception $e) {
+//            return response()->json([
+//                'message' => $e->getMessage(),
+//                'status' => 'error',
+//                'statusCode' => Response::HTTP_NOT_FOUND
+//            ], Response::HTTP_NOT_FOUND);
+//        }
+//    }
 
     /**
      * @OA\Get(
@@ -508,7 +508,7 @@ class notificationController extends Controller
      *     )
      * )
      */
-    public function getSettingsNotification($id, Request $request)
+    public function getSettingsNotification($id,Request $request)
     {
         try {
             if (Auth::user()->role == 0) {
@@ -522,9 +522,30 @@ class notificationController extends Controller
             $limit = $request->query('limit', 10);
             $status = $request->query('pagination', false);
             $type = $request->query('type', 'all');
-            $query = notification::with(['event', 'create_by', 'userJoin.user'])->where('user_id', $id);
+            $query = notification::with(['event', 'create_by', 'userJoin.user']);
+            $sender = $request->query('sender');
+            if (!empty($sender)) {
+                $id = $sender;
+            }
+            $query->where('user_id', $id);
+//            dd($query->toSql());
+            // Tìm kiếm theo title (tiêu đề thông báo)
+            $title = $request->query('title');
+            if (!empty($title)) {
+                $query->where('title', 'like', '%' . $title . '%');
+            }
 
-//            $notification = ($status) ? $query->withTrashed()->get() : $query->withTrashed()->paginate($limit, ['*'], 'page', $page);
+            // Tìm kiếm theo from_date và to_date
+            $fromDate = $request->query('from_date');
+            $toDate = $request->query('to_date', now()->toDateTimeString());
+
+            if ($fromDate) {
+                $query->where('sent_at', '>=', $fromDate);
+
+                if ($toDate) {
+                    $query->where('sent_at', '<=', $toDate);
+                }
+            }
             $notification = getNotifications($query, $status, $type, $limit, $page);
             if ($page > $notification->lastPage()) {
                 $page = 1;
