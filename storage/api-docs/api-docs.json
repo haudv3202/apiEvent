@@ -7517,7 +7517,7 @@
                 }
             }
         },
-        "/api/updateUser/{id}": {
+        "/api/updateUser": {
             "patch": {
                 "tags": [
                     "Participants"
