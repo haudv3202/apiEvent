@@ -418,24 +418,42 @@ class participantsController extends Controller
             $dataImport = [];
             for ($i = 1; $i < count($List[0]); $i++) {
                 if (!empty($List[0][$i][1]) && !empty($List[0][$i][2]) && !empty($List[0][$i][3] && !empty($List[0][$i][4]))) {
-                    $dataHandle = explode('@', $List[0][$i][0])[0];
-                    $dataImport[] = [
-                        'name' =>  $List[0][$i][1],
-                        'email' => $List[0][$i][2],
-                        'role' =>  0 ,
-                        'phone' =>  $List[0][$i][3],
-                        'student_code' => $List[0][$i][4],
-                        'password' => bcrypt($dataHandle),
-                        'created_at' => now()
-                    ];
+                    $email = $List[0][$i][2];
+
+                    // Kiểm tra xem email đã tồn tại trong cơ sở dữ liệu hay chưa
+                    $existingUser = User::where('email', $email)->first();
+                    if (!$existingUser) {
+                        // Nếu email chưa tồn tại, thêm vào mảng dataImport
+                        $dataHandle = explode('@', $List[0][$i][0])[0];
+                        $dataImport[] = [
+                            'name' => $List[0][$i][1],
+                            'email' => $email,
+                            'role' => 0,
+                            'phone' => $List[0][$i][3],
+                            'student_code' => $List[0][$i][4],
+                            'password' => bcrypt($dataHandle),
+                            'created_at' => now()
+                        ];
+                    } else {
+                        continue;
+                    }
                 }
             }
-            DB::table('users')->insert($dataImport);
-            return response()->json([
-                'message' => 'Nhập Danh sách người dùng thành công',
-                'status' => 'success',
-                'statusCode' => Response::HTTP_OK
-            ], Response::HTTP_OK);
+            if (!empty($dataImport)) {
+                DB::table('users')->insert($dataImport);
+                     return response()->json([
+                         'message' => "Nhập thành công " . count($dataImport) . " người dùng",
+                         'status' => 'success',
+                         'statusCode' => Response::HTTP_OK
+                     ], Response::HTTP_OK);
+            }else {
+                return response()->json([
+                    'message' => "Không có người dùng nào được nhập hoặc đã có trong hệ thống",
+                    'status' => 'error',
+                    'statusCode' => Response::HTTP_CONFLICT
+                ], Response::HTTP_CONFLICT);
+            }
+
         } catch (\Exception $e) {
             return response()->json([
                 'message' => $e->getMessage(),
