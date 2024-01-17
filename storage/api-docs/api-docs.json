@@ -6796,7 +6796,7 @@
                     "Participants"
                 ],
                 "summary": "Thêm mới người dùng với dữ liệu được cung cấp",
-                "description": "\n     * -Endpoint trả về người dùng vừa được thêm\n     * -Role người thêm phải lớn hơn hoặc bằng người được thêm\n     * -Role là sinh viên thì không có quyền thêm\n     * - Password mặc định sẽ là tên email đằng trước dấu @ ví dụ Email là example@gmail.com  thì password là example\n     * - Name cũng vậy\n     * ",
+                "description": "\n     * -Endpoint trả về người dùng vừa được thêm\n     * -Role người thêm phải lớn hơn hoặc bằng người được thêm\n     * -Role là sinh viên thì không có quyền thêm\n     * - Password mặc định sẽ là tên email đằng trước dấu @ ví dụ Email là example@gmail.com  thì password là example\n     * ",
                 "operationId": "storeParticipants",
                 "requestBody": {
                     "required": true,
@@ -6804,9 +6804,17 @@
                         "application/json": {
                             "schema": {
                                 "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Phuc La"
+                                    },
                                     "email": {
                                         "type": "string",
                                         "example": "phuclaf@gmail.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "0983118272"
                                     },
                                     "role": {
                                         "type": "integer",
