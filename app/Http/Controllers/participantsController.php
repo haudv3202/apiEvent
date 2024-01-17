@@ -260,13 +260,14 @@ class participantsController extends Controller
      * -Role người thêm phải lớn hơn hoặc bằng người được thêm
      * -Role là sinh viên thì không có quyền thêm
      * - Password mặc định sẽ là tên email đằng trước dấu @ ví dụ Email là example@gmail.com  thì password là example
-     * - Name cũng vậy
      * ",
      *     operationId="storeParticipants",
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
+    *            @OA\Property(property="name", type="string", example="Phuc La"),
      *                     @OA\Property(property="email", type="string", example="phuclaf@gmail.com"),
+     *                     @OA\Property(property="phone", type="string", example="0983118272"),
      *                     @OA\Property(property="role", type="integer", example=1),
      *         )
      *     ),
@@ -308,20 +309,32 @@ class participantsController extends Controller
             $logUser = auth()->user()->role;
             $userAdd = $request->role;
             $validator = Validator::make($request->all(), [
+                'name' => [
+                    'required','unique:users,name'
+                ],
                 'email' => [
-                    'required'
+                    'required','unique:users,email'
+                ],
+                'phone' => [
+                    'required',
+                    'regex:/^(\+?\d{1,3}[- ]?)?\d{10}$/','unique:users,phone'
                 ],
                 'role' => [
                     'required',
                     Rule::in([0, 1, 2])
-                ]
+                ],
+                'student_code' => 'unique:users,student_code'
             ], [
                 'name.required' => 'Không để trống name của người dùng',
                 'email.required' => 'Không để trống email của người dùng',
                 'phone.required' => 'Số điện thoại không được để trống',
                 'phone.regex' => 'Số điện thoại không đúng định dạng',
                 'role.required' => 'Role không được để trống',
-                'role.in' => 'Role phải là 0 hoặc 1 hoặc 2'
+                'role.in' => 'Role phải là 0 hoặc 1 hoặc 2',
+                'student_code.unique' => 'Mã sinh viên đã tồn tại',
+                'email.unique' => 'Email đã tồn tại',
+                'phone.unique' => 'Số điện thoại đã tồn tại',
+                'name.unique' => 'Tên người dùng đã tồn tại'
             ]);
 
             if ($validator->fails()) {
@@ -340,8 +353,7 @@ class participantsController extends Controller
                 ], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
             $data = $validator->validated();
-            $data['name'] = explode('@', $request->email)[0];
-            $data['password'] = bcrypt($data['name']);
+            $data['password'] = bcrypt(explode('@', $request->email)[0]);
             $user = User::create($data);
             return response()->json([
                 'metadata' => $user,
