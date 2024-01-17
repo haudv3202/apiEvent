@@ -150,7 +150,7 @@ class eventController extends Controller
                 $status = true;
                 $event = $query->take($limit)->get();
             } else {
-                $event = ($status) ? $query->get() : $query->paginate(5, ['*'], 'page', $page);
+                $event = ($status) ? $query->get() : $query->paginate($limit, ['*'], 'page', $page);
             }
             if (!$status && $page > $event->lastPage()) {
                 $page = 1;
