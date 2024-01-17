@@ -535,6 +535,11 @@ class notificationController extends Controller
                 $query->where('title', 'like', '%' . $title . '%');
             }
 
+            $eventId = $request->query('event');
+            if (!empty($eventId)) {
+                $query->where('event_id',$eventId );
+            }
+
             // Tìm kiếm theo from_date và to_date
             $fromDate = $request->query('from_date');
             $toDate = $request->query('to_date', now()->toDateTimeString());
