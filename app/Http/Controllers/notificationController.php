@@ -440,6 +440,7 @@ class notificationController extends Controller
      *      - Sẽ có 1 số option param sau
      *     - page=<số trang> chuyển sang trang cần
      *     - limit=<số record> số record muốn lấy trong 1 trang
+     *     - event=<id sự kiện muốn tìm>
      *     - pagination=true|false sẽ là trạng thái phân trang hoặc không phân trang <mặc định là false phân trang>
      *     - type=<all|sent|scheduled|deleted> sẽ là param để lấy ra các list thông báo đang được setting <mặc định là all>
      *     - all là lấy ra toàn bộ thông báo đã được setting kể cả đã xóa mềm
