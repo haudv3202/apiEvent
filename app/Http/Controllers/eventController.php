@@ -130,7 +130,7 @@ class eventController extends Controller
 //            ->orWhere('description', 'like', "%{$search}%")
                 ->orWhere('start_time', 'like', "%{$search}%")
                 ->orWhere('end_time', 'like', "%{$search}%")
-                ->withCount('attendances')->with('user')->with('keywords')->with([
+                ->withCount('attendances')->with('user')->with('keywords')->with(['notifications',
                     'attendances' => function ($query) {
                         $query->with('user')->select('atendances.*')
                             ->selectSub(function ($subQuery) {
@@ -171,7 +171,17 @@ class eventController extends Controller
 //                ->orWhere('description', 'like', "%{$search}%")
                     ->orWhere('start_time', 'like', "%{$search}%")
                     ->orWhere('end_time', 'like', "%{$search}%")
-                    ->withCount('attendances')->with('user')->with('keywords')->with('notifications')
+                    ->withCount('attendances')->with('user')->with('keywords')->with(['notifications',
+                        'attendances' => function ($query) {
+                            $query->with('user')->select('atendances.*')
+                                ->selectSub(function ($subQuery) {
+                                    $subQuery->selectRaw('IF(COUNT(feedback.id) > 0, 1, 0) as status_feedback')
+                                        ->from('feedback')
+                                        ->whereColumn('feedback.event_id', 'atendances.event_id')
+                                        ->whereColumn('feedback.user_id', '=', 'atendances.user_id');
+                                }, 'status_feedback');
+                        }
+                    ])
                     ->leftJoin('attendances', function ($join) {
                         $join->on('events.id', '=', 'attendances.event_id')
                             ->where('attendances.user_id', '=', Auth::user()->id);
@@ -311,7 +321,18 @@ class eventController extends Controller
 //                ->orWhere('description', 'like', "%{$search}%")
                 ->orWhere('start_time', 'like', "%{$search}%")
                 ->orWhere('end_time', 'like', "%{$search}%")
-                ->withCount('attendances')->with('user')->with('keywords')->with('notifications');
+                ->withCount('attendances')->with('user')->with('keywords')->with([
+                    'notifications',
+                    'attendances' => function ($query) {
+                        $query->with('user')->select('atendances.*')
+                            ->selectSub(function ($subQuery) {
+                                $subQuery->selectRaw('IF(COUNT(feedback.id) > 0, 1, 0) as status_feedback')
+                                    ->from('feedback')
+                                    ->whereColumn('feedback.event_id', 'atendances.event_id')
+                                    ->whereColumn('feedback.user_id', '=', 'atendances.user_id');
+                            }, 'status_feedback');
+                    }
+                ]);
 
 
             $query->leftJoin('atendances', function ($join) {
@@ -338,7 +359,18 @@ class eventController extends Controller
 //                    ->orWhere('description', 'like', "%{$search}%")
                     ->orWhere('start_time', 'like', "%{$search}%")
                     ->orWhere('end_time', 'like', "%{$search}%")
-                    ->withCount('attendances')->with('user')->with('keywords')->with('notifications')
+                    ->withCount('attendances')->with('user')->with('keywords')->with([
+                        'notifications',
+                        'attendances' => function ($query) {
+                            $query->with('user')->select('atendances.*')
+                                ->selectSub(function ($subQuery) {
+                                    $subQuery->selectRaw('IF(COUNT(feedback.id) > 0, 1, 0) as status_feedback')
+                                        ->from('feedback')
+                                        ->whereColumn('feedback.event_id', 'atendances.event_id')
+                                        ->whereColumn('feedback.user_id', '=', 'atendances.user_id');
+                                }, 'status_feedback');
+                        }
+                    ])
                     ->leftJoin('attendances', function ($join) {
                         $join->on('events.id', '=', 'attendances.event_id')
                             ->where('attendances.user_id', '=', Auth::user()->id);
