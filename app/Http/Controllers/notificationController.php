@@ -341,7 +341,6 @@ class notificationController extends Controller
                 ], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
             $notification = notification::onlyTrashed()->where('id', $id)->get();
-
             return response()->json([
                 'metadata' => $notification,
                 'message' => 'Lấy thông báo đã xóa thành công',
