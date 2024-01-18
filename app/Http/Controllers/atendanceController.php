@@ -609,7 +609,7 @@ class atendanceController extends Controller
                 ], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
 
-            $event = event::find($request->event_id);
+            $event = event::find($id);
             if($event->status == 0){
                 return response([
                     "status" => "error",
