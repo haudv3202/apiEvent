@@ -157,8 +157,7 @@ class eventController extends Controller
             $query->orderBy('id', ($sort) == 'oldest' ? 'asc' : 'desc');
 //            $event = ($status) ? $query->get() : $query->paginate($limit, ['*'], 'page', $page);
             if ($search) {
-                $status = true;
-                $event = $query->take($limit)->get();
+                $event =  ($status) ? $query->take($limit)->get() : $query->paginate($limit, ['*'], 'page', $page);
             } else {
                 $event = ($status) ? $query->get() : $query->paginate($limit, ['*'], 'page', $page);
             }
