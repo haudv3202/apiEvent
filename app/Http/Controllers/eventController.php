@@ -1054,6 +1054,12 @@ class eventController extends Controller
                         ->whereColumn('atendances.event_id', 'events.id')
                         ->where('atendances.user_id', Auth::user()->id);
                 }, 'status_join')
+//                ->selectSub(function ($query) {
+//                    $query->selectRaw('IF(COUNT(feedback.id) > 0, 1, 0) as status_feedback')
+//                        ->from('feedback')
+//                        ->whereColumn('feedback.event_id', 'events.id')
+//                        ->where('feedback.user_id', Auth::user()->id);
+//                }, 'status_feedback')
                 ->with([
                     'feedback' => function ($query) {
                         $query->with('user');
@@ -1064,10 +1070,15 @@ class eventController extends Controller
                         $query->with('create_by');
                     },
                     'attendances' => function ($query) {
-                        $query->with('user');
+                        $query->with('user')->select('atendances.*')
+                            ->selectSub(function ($subQuery) {
+                                $subQuery->selectRaw('IF(COUNT(feedback.id) > 0, 1, 0) as status_feedback')
+                                    ->from('feedback')
+                                    ->whereColumn('feedback.event_id', 'atendances.event_id')
+                                    ->whereColumn('feedback.user_id', '=', 'atendances.user_id');
+                            }, 'status_feedback');
                     }])
                 ->findOrFail($id);
-//            $event->banner = url("Upload/{$event->banner}");
             return response()->json([
                 'metadata' => $event,
                 'message' => 'Get One Record Successfully',
