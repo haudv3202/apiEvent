@@ -1014,6 +1014,7 @@ class notificationController extends Controller
     {
         try {
             $notification = notification::with('event')->findOrFail($id);
+
 //            'receiver_id' => 'exists:users,id',
             $validator = Validator::make($request->all(), [
                 'event_id' => 'exists:events,id',
