@@ -1402,6 +1402,7 @@ class eventController extends Controller
     {
         //Check validate
 //        dd($request->all());
+
         $validate = Validator::make($request->all(), [
             'contact' => [
                 'regex:/^(\+?\d{1,3}[- ]?)?\d{10}$/'
