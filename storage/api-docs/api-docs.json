@@ -2677,7 +2677,7 @@
                     "Event"
                 ],
                 "summary": "Lấy dữ liệu sự kiện từ một id cho trước",
-                "description": "\n     * -Endpoint này lấy ra 1 bản ghi của sự kiện\n     * -id là id của event mà mình cần tìm kiếm",
+                "description": "\n     * -Endpoint này lấy ra 1 bản ghi của sự kiện\n     * - status_feedback <1|0> 1 là đã phản hồi sự kiện 0 là chưa phản hồi\n     * -id là id của event mà mình cần tìm kiếm",
                 "operationId": "getEventsById",
                 "parameters": [
                     {

@@ -972,6 +972,7 @@ class eventController extends Controller
      *      summary="Lấy dữ liệu sự kiện từ một id cho trước",
      *      description="
      * -Endpoint này lấy ra 1 bản ghi của sự kiện
+     * - status_feedback <1|0> 1 là đã phản hồi sự kiện 0 là chưa phản hồi
      * -id là id của event mà mình cần tìm kiếm",
      *      @OA\Parameter(
      *          name="id",
