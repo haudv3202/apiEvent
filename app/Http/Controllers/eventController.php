@@ -344,7 +344,13 @@ class eventController extends Controller
                         ->from('atendances')
                         ->whereColumn('atendances.event_id', 'events.id')
                         ->where('atendances.user_id', Auth::user()->id);
-                }, 'status_join');
+                }, 'status_join')
+            ->selectSub(function ($query) {
+                $query->selectRaw('IF(COUNT(feedback.id) > 0, 1, 0) as status_feedBack_join')
+                    ->from('feedback')
+                    ->whereColumn('feedback.event_id', 'events.id')
+                    ->where('feedback.user_id', Auth::user()->id);
+            }, 'status_feedBack_join');
             $query->orderBy('id', ($sort) == 'oldest' ? 'asc' : 'desc');
             // having là câu lệnh lọc data < ở đây là lọc status_join sau khi đưa ra kết quả
             $query->having('status_join', 1);
@@ -1096,6 +1102,12 @@ class eventController extends Controller
                         ->whereColumn('atendances.event_id', 'events.id')
                         ->where('atendances.user_id', Auth::user()->id);
                 }, 'status_join')
+                ->selectSub(function ($query) {
+                    $query->selectRaw('IF(COUNT(feedback.id) > 0, 1, 0) as status_feedBack_join')
+                        ->from('feedback')
+                        ->whereColumn('feedback.event_id', 'events.id')
+                        ->where('feedback.user_id', Auth::user()->id);
+                }, 'status_feedBack_join')
 //                ->selectSub(function ($query) {
 //                    $query->selectRaw('IF(COUNT(feedback.id) > 0, 1, 0) as status_feedback')
 //                        ->from('feedback')
