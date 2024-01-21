@@ -436,7 +436,7 @@ class participantsController extends Controller
                     $existingUser = User::where('email', $email)->first();
                     if (!$existingUser) {
                         // Nếu email chưa tồn tại, thêm vào mảng dataImport
-                        $dataHandle = explode('@', $List[0][$i][0])[0];
+                        $dataHandle = explode('@', $email)[0];
                         $dataImport[] = [
                             'name' => $List[0][$i][1],
                             'email' => $email,
