@@ -310,7 +310,7 @@ class participantsController extends Controller
             $userAdd = $request->role;
             $validator = Validator::make($request->all(), [
                 'name' => [
-                    'required','unique:users,name'
+                    'required'
                 ],
                 'email' => [
                     'required','unique:users,email'
