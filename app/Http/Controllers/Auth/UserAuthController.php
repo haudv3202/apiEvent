@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -230,6 +231,78 @@ class UserAuthController extends Controller
             'statusCode' => Response::HTTP_OK
         ], Response::HTTP_OK);
     }
+
+    /**
+     * @OA\Post(
+     *     path="/api/check-password",
+     *     summary="Check mật khẩu cũ có khớp với mật khẩu hiện tại",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="email", type="string", format="email", description="User's email"),
+     *             @OA\Property(property="passowrd", type="string", format="password", description="User's password"),
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Password reset email sent successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="metadata", type="boolean", description="true"),
+     *             @OA\Property(property="message", type="string", description="Mật Khẩu chính xác"),
+     *             @OA\Property(property="status", type="string", description="Status"),
+     *             @OA\Property(property="statusCode", type="integer", description="HTTP status code"),
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="User not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", description="Error message"),
+     *             @OA\Property(property="status", type="string", description="Status"),
+     *             @OA\Property(property="statusCode", type="integer", description="HTTP status code"),
+     *         )
+     *     ),
+     * )
+     */
+    public function checkPass(Request $request){
+        $validate = Validator::make($request->all(),[
+            'password' => 'required',
+            'email' => 'required|email|exists:users,email'
+        ],[
+            'password.required' => 'Mật khẩu không thể để trống',
+            'email.required' => 'Email không thể để trống',
+            'email.email' => 'Email không đúng định dạng',
+            'email.exists' => 'Email không tồn tại'
+        ]);
+        if($validate->fails()){
+            return response([
+                "status" => "error",
+                "message" => $validate->errors()->all(),
+                'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        if(!Hash::check($request->password, $user->password)){
+            return response()->json([
+                'metadata' => false,
+                'message' => 'Mật khẩu không chính xác',
+                'status' => 'error',
+                'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        return response()->json([
+            'metadata' => true,
+            'message' => 'Mật khẩu chính xác',
+            'status' => 'success',
+            'statusCode' => Response::HTTP_OK
+        ], Response::HTTP_OK);
+
+    }
+
     /**
      * @OA\Put(
      *     path="/api/reset-password/{token}",

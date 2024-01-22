@@ -33,6 +33,7 @@ Route::get('/callback', [GoogleController::class, 'callback']);
 //Route::post('register',[UserAuthController::class,'register']);
 Route::post('login',[UserAuthController::class,'login']);
 Route::post('reset-password', [UserAuthController::class,'sendMail']);
+Route::post('check-password', [UserAuthController::class,'checkPass']);
 Route::put('reset-password/{token}', [UserAuthController::class,'reset']);
 //Route::apiResource('employees',EmployeeController::class)->middleware('auth:api');
 

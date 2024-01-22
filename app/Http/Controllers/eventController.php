@@ -157,7 +157,7 @@ class eventController extends Controller
             $query->orderBy('id', ($sort) == 'oldest' ? 'asc' : 'desc');
 //            $event = ($status) ? $query->get() : $query->paginate($limit, ['*'], 'page', $page);
             if ($search) {
-                $event =  ($status) ? $query->take($limit)->get() : $query->paginate($limit, ['*'], 'page', $page);
+                $event = ($status) ? $query->take($limit)->get() : $query->paginate($limit, ['*'], 'page', $page);
             } else {
                 $event = ($status) ? $query->get() : $query->paginate($limit, ['*'], 'page', $page);
             }
@@ -345,12 +345,12 @@ class eventController extends Controller
                         ->whereColumn('atendances.event_id', 'events.id')
                         ->where('atendances.user_id', Auth::user()->id);
                 }, 'status_join')
-            ->selectSub(function ($query) {
-                $query->selectRaw('IF(COUNT(feedback.id) > 0, 1, 0) as status_feedBack_join')
-                    ->from('feedback')
-                    ->whereColumn('feedback.event_id', 'events.id')
-                    ->where('feedback.user_id', Auth::user()->id);
-            }, 'status_feedBack_join');
+                ->selectSub(function ($query) {
+                    $query->selectRaw('IF(COUNT(feedback.id) > 0, 1, 0) as status_feedBack_join')
+                        ->from('feedback')
+                        ->whereColumn('feedback.event_id', 'events.id')
+                        ->where('feedback.user_id', Auth::user()->id);
+                }, 'status_feedBack_join');
             $query->orderBy('id', ($sort) == 'oldest' ? 'asc' : 'desc');
             // having là câu lệnh lọc data < ở đây là lọc status_join sau khi đưa ra kết quả
             $query->having('status_join', 1);
@@ -824,6 +824,7 @@ class eventController extends Controller
      *             @OA\Property(property="location", type="string", example="Hai Phong"),
      *             @OA\Property(property="contact", type="string", example="0983467584"),
      *             @OA\Property(property="banner", type="string",format = "binary", example="anh1.jpg"),
+     *             @OA\Property(property="description", type="string", example="Sự kiện rất hoành tráng"),
      *             @OA\Property(property="start_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
      *             @OA\Property(property="end_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
      *                       @OA\Property(property="content", type="string", example="Chào mừng tổng thống"),
@@ -918,6 +919,7 @@ class eventController extends Controller
         $validate = Validator::make($request->all(), [
             'name' => ['required'],
             'location' => ['required'],
+            'description' => 'required',
             'contact' => [
                 'required',
                 'regex:/^(\+?\d{1,3}[- ]?)?\d{10}$/'
@@ -1533,7 +1535,7 @@ class eventController extends Controller
 //                $request->banner->move(public_path('Upload'), $img);
 //                Storage::disk('public')->put('Upload/' . $imageName, base64_decode($image));
 //                $imageUrl = Storage::url($imagePath);
-                $resourceData = $request->only(['name', 'location', 'contact', 'status', 'banner', 'start_time', 'end_time', 'content', 'user_id', 'keywords']);
+                $resourceData = $request->only(['name', 'location', 'contact', 'status','description', 'banner', 'start_time', 'end_time', 'content', 'user_id', 'keywords']);
 //                $resourceData['banner'] = $imageName;
 //                $resourceData['user_id'] = Auth::user()->id;
 //                $resourceData
