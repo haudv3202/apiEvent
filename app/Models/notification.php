@@ -10,7 +10,7 @@ class notification extends Model
 {
     use HasFactory,SoftDeletes;
 //'receiver_id'
-    protected $fillable = ['title','content','status','event_id','time_send','sent_at','user_id'];
+    protected $fillable = ['title','content','event_id','time_send','sent_at','user_id'];
 
 //user_receiver
 

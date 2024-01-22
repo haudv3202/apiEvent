@@ -5503,10 +5503,6 @@
                                                         "format": "date-time",
                                                         "example": "2023-11-25 01:50:33"
                                                     },
-                                                    "status": {
-                                                        "type": "integer",
-                                                        "example": 2
-                                                    },
                                                     "created_at": {
                                                         "type": "string",
                                                         "format": "date-time",
@@ -5586,10 +5582,6 @@
                                     "event_id": {
                                         "type": "integer",
                                         "example": 1
-                                    },
-                                    "status": {
-                                        "type": "integer",
-                                        "example": 1
                                     }
                                 },
                                 "type": "object"
@@ -5629,10 +5621,6 @@
                                                         "type": "string",
                                                         "format": "date-time",
                                                         "example": "2023-11-25 01:50:33"
-                                                    },
-                                                    "status": {
-                                                        "type": "integer",
-                                                        "example": 2
                                                     },
                                                     "created_at": {
                                                         "type": "string",
@@ -5846,10 +5834,6 @@
                                                         "type": "string",
                                                         "format": "date-time",
                                                         "example": "2023-11-25 01:50:33"
-                                                    },
-                                                    "status": {
-                                                        "type": "integer",
-                                                        "example": 2
                                                     },
                                                     "created_at": {
                                                         "type": "string",
@@ -6077,10 +6061,6 @@
                                                         "format": "date-time",
                                                         "example": "2023-11-25 01:50:33"
                                                     },
-                                                    "status": {
-                                                        "type": "integer",
-                                                        "example": 2
-                                                    },
                                                     "created_at": {
                                                         "type": "string",
                                                         "format": "date-time",
@@ -6274,10 +6254,6 @@
                                                     "format": "date-time",
                                                     "example": "2023-11-25 01:50:33"
                                                 },
-                                                "status": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
                                                 "created_at": {
                                                     "type": "string",
                                                     "format": "date-time",
@@ -6429,10 +6405,6 @@
                                                         "format": "date-time",
                                                         "example": "2023-11-25 01:50:33"
                                                     },
-                                                    "status": {
-                                                        "type": "integer",
-                                                        "example": 2
-                                                    },
                                                     "created_at": {
                                                         "type": "string",
                                                         "format": "date-time",
@@ -6545,10 +6517,6 @@
                                         "example": "2023-11-28T17:02:29"
                                     },
                                     "event_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "status": {
                                         "type": "integer",
                                         "example": 1
                                     }

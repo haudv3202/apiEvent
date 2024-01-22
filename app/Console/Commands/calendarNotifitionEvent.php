@@ -35,9 +35,7 @@ class calendarNotifitionEvent extends Command
         $dateCr = $currentDateTime->toDateTimeString();
         $fiveHoursAhead = $currentDateTime->addHours(12)->toDateTimeString();
         $events = event::where('start_time', '>=', $dateCr)
-            ->with(['attendances.user', 'user','notifications' => function($query){
-                $query->where('status',2);
-            }])
+            ->with(['attendances.user', 'user','notifications'])
             ->where('start_time', '<', $fiveHoursAhead)
             ->where('status', 2)
             ->where('notification_sent', false)

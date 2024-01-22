@@ -19,7 +19,7 @@ return new class extends Migration
             $table->dateTime('time_send');
             $table->dateTime('sent_at')->nullable();
 //            $table->bigInteger('receiver_id');
-            $table->tinyInteger('status');
+//            $table->tinyInteger('status');
             $table->foreignIdFor(event::class);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->nullable()->useCurrentOnUpdate();

@@ -55,7 +55,6 @@ class notificationController extends Controller
      *                     @OA\Property(property="content", type="string", example="<h1 style='color:red;'>Test message</h1>"),
      *                     @OA\Property(property="time_send", type="string", format="date-time", example="2023-11-25 01:42:27"),
      *                     @OA\Property(property="sent_at", type="string", format="date-time", example="2023-11-25 01:50:33"),
-     *                     @OA\Property(property="status", type="integer", example=2),
      *                     @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-28 11:00:00"),
      *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-28 11:30:00")
      *                 )
@@ -162,7 +161,6 @@ class notificationController extends Controller
 //     *                 @OA\Property(property="content", type="string", example="<h1 style='color:red;'>Test message</h1>"),
 //     *                 @OA\Property(property="time_send", type="string", format="date-time", example="2023-11-25 01:42:27"),
 //     *                 @OA\Property(property="sent_at", type="string", format="date-time", example="2023-11-25 01:50:33"),
-//     *                 @OA\Property(property="status", type="integer", example=2),
 //     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-28 11:00:00"),
 //     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-28 11:30:00")
 //     *             ),
@@ -294,7 +292,6 @@ class notificationController extends Controller
      *                 @OA\Property(property="content", type="string", example="<h1 style='color:red;'>Test message</h1>"),
      *                 @OA\Property(property="time_send", type="string", format="date-time", example="2023-11-25 01:42:27"),
      *                 @OA\Property(property="sent_at", type="string", format="date-time", example="2023-11-25 01:50:33"),
-     *                 @OA\Property(property="status", type="integer", example=2),
      *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-28 11:00:00"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-28 11:30:00")
      *                 ),
@@ -472,7 +469,6 @@ class notificationController extends Controller
      *                     @OA\Property(property="content", type="string", example="<h1 style='color:red;'>Test message</h1>"),
      *                     @OA\Property(property="time_send", type="string", format="date-time", example="2023-11-25 01:42:27"),
      *                     @OA\Property(property="sent_at", type="string", format="date-time", example="2023-11-25 01:50:33"),
-     *                     @OA\Property(property="status", type="integer", example=2),
      *                     @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-28 11:00:00"),
      *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-28 11:30:00")
      *                 )
@@ -628,7 +624,6 @@ class notificationController extends Controller
      *              @OA\Property(property="title", type="string", example="title content"),
      *             @OA\Property(property="time_send", type="string", format="date-time", example="2023-11-28T17:02:29"),
      *             @OA\Property(property="event_id", type="integer", example=1),
-     *             @OA\Property(property="status", type="integer", example=1)
      *         )
      *     ),
      * @OA\Response(
@@ -645,7 +640,6 @@ class notificationController extends Controller
      *                     @OA\Property(property="content", type="string", example="<h1 style='color:red;'>Test message</h1>"),
      *                     @OA\Property(property="time_send", type="string", format="date-time", example="2023-11-25 01:42:27"),
      *                     @OA\Property(property="sent_at", type="string", format="date-time", example="2023-11-25 01:50:33"),
-     *                     @OA\Property(property="status", type="integer", example=2),
      *                     @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-28 11:00:00"),
      *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-28 11:30:00")
      *             )),
@@ -696,21 +690,10 @@ class notificationController extends Controller
             $validator = Validator::make($request->all(), [
                 'title' => 'required',
                 'content' => 'required',
-                'status' => ['required', Rule::in([0, 1, 2])],
+//                'status' => ['required', Rule::in([0, 1, 2])],
 //                'receiver_id' => 'required|exists:users,id',
                 'event_id' => 'required|exists:events,id',
-                'time_send' => ['unique:notifications,time_send', 'after:' . now(), function ($attribute, $value, $fail) use ($request) {
-                    $status = $request->input('status');
-                    $eventId = $request->input('event_id');
-                    $event = Event::find($eventId);
-                    if ($status == 2 && Carbon::parse($value)->greaterThanOrEqualTo($event->start_time)) {
-                        $fail('Trạng thái gửi là chuẩn bị diễn ra thì thời gian phải trước khi thời gian sự kiện diễn ra');
-                    } elseif ($status == 1 && (Carbon::parse($value)->lessThan($event->start_time) || Carbon::parse($value)->greaterThan($event->end_time))) {
-                        $fail('Trạng thái gửi là đang diễn ra thì thời gian gửi phải trong khoảng thời gian diễn ra sự kiện');
-                    } elseif ($status == 0 && Carbon::parse($value)->lessThan($event->end_time)) {
-                        $fail('Trạng thái gửi là đã kết thúc thì thời gian gửi phải lớn hơn thời gian sự kiện kết thúc');
-                    }
-                }]
+                'time_send' => 'unique:notifications,time_send'
             ], [
                 'title.required' => 'Tiêu để không được để trống',
                 'content.required' => 'Nội dung không được để trống',
@@ -747,7 +730,7 @@ class notificationController extends Controller
                 'title' => $request->title,
                 'content' => $request->input('content'),
                 'time_send' => $request->time_send,
-                'status' => $request->status,
+//                'status' => $request->status,
 //                'receiver_id' => $request->receiver_id,
                 'event_id' => $request->event_id,
                 'user_id' => $user->id
@@ -889,7 +872,6 @@ class notificationController extends Controller
      *                 @OA\Property(property="content", type="string", example="<h1 style='color:red;'>Test message</h1>"),
      *                 @OA\Property(property="time_send", type="string", format="date-time", example="2023-11-25 01:42:27"),
      *                 @OA\Property(property="sent_at", type="string", format="date-time", example="2023-11-25 01:50:33"),
-     *                 @OA\Property(property="status", type="integer", example=1),
      *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-28 11:00:00"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-28 11:30:00")
      *             ),
@@ -968,7 +950,6 @@ class notificationController extends Controller
      *              @OA\Property(property="title", type="string", example="title content"),
      *             @OA\Property(property="time_send", type="string", format="date-time", example="2023-11-28T17:02:29"),
      *             @OA\Property(property="event_id", type="integer", example=1),
-     *             @OA\Property(property="status", type="integer", example=1)
      *         )
      *     ),
      *     @OA\Response(
@@ -1018,19 +999,8 @@ class notificationController extends Controller
 //            'receiver_id' => 'exists:users,id',
             $validator = Validator::make($request->all(), [
                 'event_id' => 'exists:events,id',
-                'status' => [Rule::in([1, 2, 3])],
-                'time_send' => ['unique:notifications,time_send', 'after:' . now(), function ($attribute, $value, $fail) use ($request, $notification) {
-                    $status = $request->input('status', $notification->status);
-                    $eventId = $request->input('event_id', $notification->event->id);
-                    $eventUpdate = Event::find($eventId);
-                    if ($status == 2 && Carbon::parse($value)->greaterThanOrEqualTo($eventUpdate->start_time)) {
-                        $fail('Trạng thái gửi là chuẩn bị diễn ra thì thời gian phải trước khi thời gian sự kiện diễn ra');
-                    } elseif ($status == 1 && (Carbon::parse($value)->lessThan($eventUpdate->start_time) || Carbon::parse($value)->greaterThan($eventUpdate->end_time))) {
-                        $fail('Trạng thái gửi là đang diễn ra thì thời gian gửi phải trong khoảng thời gian diễn ra sự kiện');
-                    } elseif ($status == 0 && Carbon::parse($value)->lessThan($eventUpdate->end_time)) {
-                        $fail('Trạng thái gửi là đã kết thúc thì thời gian gửi phải lớn hơn thời gian sự kiện kết thúc');
-                    }
-                }]
+//                'status' => [Rule::in([1, 2, 3])],
+                'time_send' => 'unique:notifications,time_send'
             ], [
                 'title.required' => 'Tiêu để không được để trống',
                 'content.required' => 'Nội dung không được để trống',
@@ -1069,7 +1039,7 @@ class notificationController extends Controller
                 ], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
 //            ,'receiver_id'
-            $data = $request->only(['title', 'content', 'time_send', 'event_id', 'status']);
+            $data = $request->only(['title', 'content', 'time_send', 'event_id']);
             $data['user_id'] = Auth::user()->id;
             $data['updated_at'] = Carbon::now();
             $notification->update($data);
@@ -1127,7 +1097,6 @@ class notificationController extends Controller
      *                     @OA\Property(property="content", type="string", example="<h1 style='color:red;'>Test message</h1>"),
      *                     @OA\Property(property="time_send", type="string", format="date-time", example="2023-11-25 01:42:27"),
      *                     @OA\Property(property="sent_at", type="string", format="date-time", example="2023-11-25 01:50:33"),
-     *                     @OA\Property(property="status", type="integer", example=2),
      *                     @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-28 11:00:00"),
      *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-28 11:30:00")
      *                 )
