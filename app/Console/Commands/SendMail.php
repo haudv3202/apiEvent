@@ -7,6 +7,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\EmailApi;
 use App\Models\notification;
+
 class SendMail extends Command
 {
     /**
@@ -30,27 +31,25 @@ class SendMail extends Command
     {
         $currentDateTime = Carbon::now()->toDateTimeString();
         $emails = notification::where('time_send', '<=', $currentDateTime)
-            ->with('user_receiver',function ($query){
-                $query->select('id','name','email');
-            })
+            ->with(['event' => function ($query) {
+                $query->with('attendances.user');
+            }])
             ->whereNull('sent_at')
             ->get();
 
-
-//        $emails = notification::where('time_send', '<=', $currentDateTime)
-//            ->whereNull('time_send')
-//            ->get();
         if ($emails->count() > 0) {
-        foreach ($emails as $email) {
-            $data = [
-                'title' => $email->title,
-                'message' =>$email->content,
-            ];
-            // Gửi email tới người nhận $recipient
-            Mail::to($email->user_receiver->email)->send(new EmailApi($data));
-            $email->sent_at =  now();
-            $email->save();
-        }
+            $notificationsToUpdate = [];
+            foreach ($emails as $email) {
+                $data = [
+                    'title' => $email->title,
+                    'message' => $email->content,
+                ];
+                foreach ($email->event->attendances as $userSend) {
+                    Mail::to($userSend->user->email)->send(new EmailApi($data));
+                }
+                $notificationsToUpdate[] = $email->id;
+            }
+            notification::whereIn('id', $notificationsToUpdate)->update(['sent_at' => now()]);
         }
 
         return 0;

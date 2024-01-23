@@ -25,7 +25,7 @@ class eventFactory extends Factory
             'contact'=>fake()->unique()->phoneNumber(),
             'status' => fake()->numberBetween(0,1),
             'user_id' => fake()->numberBetween(1,30),
-            'description' => 'Sự kiện đẹp',
+//            'description' => 'Sự kiện đẹp',
             'content' => '1 Buổi hòa nhạc đặc biệt',
             'start_time' =>$start_time,
             'end_time' =>$end_time,

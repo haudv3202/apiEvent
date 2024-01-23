@@ -4,15 +4,27 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class notification extends Model
 {
-    use HasFactory;
-    protected $fillable = ['title','content','receiver_id','time_send'];
+    use HasFactory,SoftDeletes;
+//'receiver_id'
+    protected $fillable = ['title','content','event_id','time_send','sent_at','user_id'];
 
+//user_receiver
 
-    public function user_receiver()
+    public function create_by()
     {
-        return $this->belongsTo(User::class, 'receiver_id','id');
+        return $this->belongsTo(User::class, 'user_id','id');
+    }
+
+    public function event()
+    {
+        return $this->hasOne(event::class,'id','event_id');
+    }
+
+    public function userJoin(){
+        return $this->hasMany(atendance::class,'event_id','event_id');
     }
 }

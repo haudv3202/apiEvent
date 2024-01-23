@@ -43,7 +43,7 @@ class eventController extends Controller
      *     - search=<nội dung muốn tìm kiếm >
      *     - sort=<latest|oldest> mặc định sẽ là latest sẽ là sắp xếp ngày đăng mới nhất(oldest là cũ nhất)
      * ",
-     *     @OA\Response(
+     * @OA\Response(
      *         response=200,
      *         description="Successful operation",
      *         @OA\JsonContent(
@@ -62,7 +62,6 @@ class eventController extends Controller
      *                       @OA\Property(property="banner", type="string", example="http://127.0.0.1:8000/Upload/1702785355.jpg"),
      *                       @OA\Property(property="start_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
      *                       @OA\Property(property="end_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
-     *                       @OA\Property(property="description", type="string", example="Sự kiện rất hoành tráng"),
      *                       @OA\Property(property="content", type="string", example="Chào mừng tổng thống"),
      *                       @OA\Property(property="attendances_count", type="interger", example=3),
      *                       @OA\Property(property="status_join", type="interger", example=1),
@@ -92,7 +91,7 @@ class eventController extends Controller
      *
      *         )
      *     ),
-     *     @OA\Response(
+     * @OA\Response(
      *         response=404,
      *         description="Không tìm thấy bản ghi",
      *         @OA\JsonContent(
@@ -102,7 +101,7 @@ class eventController extends Controller
      *             @OA\Property(property="statusCode", type="integer", example=404)
      *         )
      *     ),
-     *      @OA\Response(
+     * @OA\Response(
      *         response=500,
      *         description="Lỗi hệ thống",
      *         @OA\JsonContent(
@@ -125,14 +124,23 @@ class eventController extends Controller
             //return $page;
 
             $query = event::where('name', 'like', "%{$search}%")
-            ->orWhere('location', 'like', "%{$search}%")
-            ->orWhere('contact', 'like', "%{$search}%")
-            ->orWhere('content', 'like', "%{$search}%")
-            ->orWhere('description', 'like', "%{$search}%")
-            ->orWhere('start_time', 'like', "%{$search}%")
-            ->orWhere('end_time', 'like', "%{$search}%")
-            ->withCount('attendances')->with('user')->with('keywords');
-
+                ->orWhere('location', 'like', "%{$search}%")
+                ->orWhere('contact', 'like', "%{$search}%")
+                ->orWhere('content', 'like', "%{$search}%")
+//            ->orWhere('description', 'like', "%{$search}%")
+                ->orWhere('start_time', 'like', "%{$search}%")
+                ->orWhere('end_time', 'like', "%{$search}%")
+                ->withCount('attendances')->with('user')->with('keywords')->with(['notifications',
+                    'attendances' => function ($query) {
+                        $query->with('user')->select('atendances.*')
+                            ->selectSub(function ($subQuery) {
+                                $subQuery->selectRaw('IF(COUNT(feedback.id) > 0, 1, 0) as status_feedback')
+                                    ->from('feedback')
+                                    ->whereColumn('feedback.event_id', 'atendances.event_id')
+                                    ->whereColumn('feedback.user_id', '=', 'atendances.user_id');
+                            }, 'status_feedback');
+                    }
+                ]);
 
 
             $query->leftJoin('atendances', function ($join) {
@@ -146,18 +154,33 @@ class eventController extends Controller
                         ->whereColumn('atendances.event_id', 'events.id')
                         ->where('atendances.user_id', Auth::user()->id);
                 }, 'status_join');
-            $query->orderBy('id',($sort) == 'oldest' ? 'asc' : 'desc');
-            $event = ($status) ? $query->get() : $query->paginate($limit, ['*'], 'page', $page);
+            $query->orderBy('id', ($sort) == 'oldest' ? 'asc' : 'desc');
+//            $event = ($status) ? $query->get() : $query->paginate($limit, ['*'], 'page', $page);
+            if ($search) {
+                $event = ($status) ? $query->take($limit)->get() : $query->paginate($limit, ['*'], 'page', $page);
+            } else {
+                $event = ($status) ? $query->get() : $query->paginate($limit, ['*'], 'page', $page);
+            }
             if (!$status && $page > $event->lastPage()) {
                 $page = 1;
                 $event = event::where('name', 'like', "%{$search}%")
-                ->orWhere('location', 'like', "%{$search}%")
-                ->orWhere('contact', 'like', "%{$search}%")
-                ->orWhere('content', 'like', "%{$search}%")
-                ->orWhere('description', 'like', "%{$search}%")
-                ->orWhere('start_time', 'like', "%{$search}%")
-                ->orWhere('end_time', 'like', "%{$search}%")
-                ->withCount('attendances')->with('user')->with('keywords')
+                    ->orWhere('location', 'like', "%{$search}%")
+                    ->orWhere('contact', 'like', "%{$search}%")
+                    ->orWhere('content', 'like', "%{$search}%")
+//                ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('start_time', 'like', "%{$search}%")
+                    ->orWhere('end_time', 'like', "%{$search}%")
+                    ->withCount('attendances')->with('user')->with('keywords')->with(['notifications',
+                        'attendances' => function ($query) {
+                            $query->with('user')->select('atendances.*')
+                                ->selectSub(function ($subQuery) {
+                                    $subQuery->selectRaw('IF(COUNT(feedback.id) > 0, 1, 0) as status_feedback')
+                                        ->from('feedback')
+                                        ->whereColumn('feedback.event_id', 'atendances.event_id')
+                                        ->whereColumn('feedback.user_id', '=', 'atendances.user_id');
+                                }, 'status_feedback');
+                        }
+                    ])
                     ->leftJoin('attendances', function ($join) {
                         $join->on('events.id', '=', 'attendances.event_id')
                             ->where('attendances.user_id', '=', Auth::user()->id);
@@ -177,7 +200,7 @@ class eventController extends Controller
 //                $event->banner = $imageUrl; // Thay đổi giá trị trường `url` của mỗi đối tượng
 //                return $event;
 //            });
-            return response()->json(handleData($status,$event), Response::HTTP_OK);
+            return response()->json(handleData($status, $event), Response::HTTP_OK);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => $e->getMessage(),
@@ -185,7 +208,7 @@ class eventController extends Controller
                 'statusCode' => $e instanceof HttpException
                     ? $e->getStatusCode()
                     : Response::HTTP_INTERNAL_SERVER_ERROR
-            ],  $e instanceof HttpException
+            ], $e instanceof HttpException
                 ? $e->getStatusCode()
                 : Response::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -210,7 +233,7 @@ class eventController extends Controller
      *     - search=<nội dung muốn tìm kiếm >
      *     - sort=<latest|oldest> mặc định sẽ là latest sẽ là sắp xếp ngày đăng mới nhất(oldest là cũ nhất)
      * ",
-     *     @OA\Response(
+     * @OA\Response(
      *         response=200,
      *         description="Successful operation",
      *         @OA\JsonContent(
@@ -229,7 +252,6 @@ class eventController extends Controller
      *                       @OA\Property(property="banner", type="string", example="http://127.0.0.1:8000/Upload/1702785355.jpg"),
      *                       @OA\Property(property="start_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
      *                       @OA\Property(property="end_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
-     *                       @OA\Property(property="description", type="string", example="Sự kiện rất hoành tráng"),
      *                       @OA\Property(property="content", type="string", example="Chào mừng tổng thống"),
      *                       @OA\Property(property="attendances_count", type="interger", example=3),
      *                       @OA\Property(property="status_join", type="interger", example=1),
@@ -259,7 +281,7 @@ class eventController extends Controller
      *
      *         )
      *     ),
-     *     @OA\Response(
+     * @OA\Response(
      *         response=404,
      *         description="Không tìm thấy bản ghi",
      *         @OA\JsonContent(
@@ -269,7 +291,7 @@ class eventController extends Controller
      *             @OA\Property(property="statusCode", type="integer", example=404)
      *         )
      *     ),
-     *      @OA\Response(
+     * @OA\Response(
      *         response=500,
      *         description="Lỗi hệ thống",
      *         @OA\JsonContent(
@@ -281,7 +303,8 @@ class eventController extends Controller
      *     )
      * )
      */
-    public function eventJoin(Request $request){
+    public function eventJoin(Request $request)
+    {
         try {
             $page = $request->query('page', 1);
             $limit = $request->query('limit', 10);
@@ -294,11 +317,21 @@ class eventController extends Controller
                 ->orWhere('location', 'like', "%{$search}%")
                 ->orWhere('contact', 'like', "%{$search}%")
                 ->orWhere('content', 'like', "%{$search}%")
-                ->orWhere('description', 'like', "%{$search}%")
+//                ->orWhere('description', 'like', "%{$search}%")
                 ->orWhere('start_time', 'like', "%{$search}%")
                 ->orWhere('end_time', 'like', "%{$search}%")
-                ->withCount('attendances')->with('user')->with('keywords');
-
+                ->withCount('attendances')->with('user')->with('keywords')->with([
+                    'notifications',
+                    'attendances' => function ($query) {
+                        $query->with('user')->select('atendances.*')
+                            ->selectSub(function ($subQuery) {
+                                $subQuery->selectRaw('IF(COUNT(feedback.id) > 0, 1, 0) as status_feedback')
+                                    ->from('feedback')
+                                    ->whereColumn('feedback.event_id', 'atendances.event_id')
+                                    ->whereColumn('feedback.user_id', '=', 'atendances.user_id');
+                            }, 'status_feedback');
+                    }
+                ]);
 
 
             $query->leftJoin('atendances', function ($join) {
@@ -311,8 +344,14 @@ class eventController extends Controller
                         ->from('atendances')
                         ->whereColumn('atendances.event_id', 'events.id')
                         ->where('atendances.user_id', Auth::user()->id);
-                }, 'status_join');
-            $query->orderBy('id',($sort) == 'oldest' ? 'asc' : 'desc');
+                }, 'status_join')
+                ->selectSub(function ($query) {
+                    $query->selectRaw('IF(COUNT(feedback.id) > 0, 1, 0) as status_feedBack_join')
+                        ->from('feedback')
+                        ->whereColumn('feedback.event_id', 'events.id')
+                        ->where('feedback.user_id', Auth::user()->id);
+                }, 'status_feedBack_join');
+            $query->orderBy('id', ($sort) == 'oldest' ? 'asc' : 'desc');
             // having là câu lệnh lọc data < ở đây là lọc status_join sau khi đưa ra kết quả
             $query->having('status_join', 1);
             $event = ($status) ? $query->get() : $query->paginate($limit, ['*'], 'page', $page);
@@ -322,10 +361,21 @@ class eventController extends Controller
                     ->orWhere('location', 'like', "%{$search}%")
                     ->orWhere('contact', 'like', "%{$search}%")
                     ->orWhere('content', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%")
+//                    ->orWhere('description', 'like', "%{$search}%")
                     ->orWhere('start_time', 'like', "%{$search}%")
                     ->orWhere('end_time', 'like', "%{$search}%")
-                    ->withCount('attendances')->with('user')->with('keywords')
+                    ->withCount('attendances')->with('user')->with('keywords')->with([
+                        'notifications',
+                        'attendances' => function ($query) {
+                            $query->with('user')->select('atendances.*')
+                                ->selectSub(function ($subQuery) {
+                                    $subQuery->selectRaw('IF(COUNT(feedback.id) > 0, 1, 0) as status_feedback')
+                                        ->from('feedback')
+                                        ->whereColumn('feedback.event_id', 'atendances.event_id')
+                                        ->whereColumn('feedback.user_id', '=', 'atendances.user_id');
+                                }, 'status_feedback');
+                        }
+                    ])
                     ->leftJoin('attendances', function ($join) {
                         $join->on('events.id', '=', 'attendances.event_id')
                             ->where('attendances.user_id', '=', Auth::user()->id);
@@ -337,7 +387,6 @@ class eventController extends Controller
                             ->whereColumn('attendances.event_id', 'events.id')
                             ->where('attendances.user_id', Auth::user()->id);
                     }, 'status_join')
-
                     ->having('status_join', 1)
                     ->paginate($limit, ['*'], 'page', $page);
             }
@@ -347,7 +396,7 @@ class eventController extends Controller
 //                $event->banner = $imageUrl; // Thay đổi giá trị trường `url` của mỗi đối tượng
 //                return $event;
 //            });
-            return response()->json(handleData($status,$event), Response::HTTP_OK);
+            return response()->json(handleData($status, $event), Response::HTTP_OK);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => $e->getMessage(),
@@ -355,7 +404,7 @@ class eventController extends Controller
                 'statusCode' => $e instanceof HttpException
                     ? $e->getStatusCode()
                     : Response::HTTP_INTERNAL_SERVER_ERROR
-            ],  $e instanceof HttpException
+            ], $e instanceof HttpException
                 ? $e->getStatusCode()
                 : Response::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -388,7 +437,6 @@ class eventController extends Controller
      * @OA\Property(property="banner", type="string", example="http://127.0.0.1:8000/Upload/1702785355.jpg"),
      *                           @OA\Property(property="start_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
      *                           @OA\Property(property="end_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
-     *                                  @OA\Property(property="description", type="string", example="Sự kiện rất hoành tráng"),
      *                       @OA\Property(property="content", type="string", example="Chào mừng tổng thống"),
      *                           @OA\Property(property="user", type="array", @OA\Items(
      *                              type="object",
@@ -478,7 +526,7 @@ class eventController extends Controller
                 'statusCode' => $e instanceof HttpException
                     ? $e->getStatusCode()
                     : Response::HTTP_INTERNAL_SERVER_ERROR
-            ],  $e instanceof HttpException
+            ], $e instanceof HttpException
                 ? $e->getStatusCode()
                 : Response::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -521,7 +569,6 @@ class eventController extends Controller
      *                         @OA\Property(property="banner", type="string", example="http://127.0.0.1:8000/Upload/1702785355.jpg"),
      *                         @OA\Property(property="start_time", type="string", format="date-time", example="2023-11-23T11:20:22"),
      *                         @OA\Property(property="end_time", type="string", format="date-time", example="2023-11-23T11:20:22"),
-     *                         @OA\Property(property="description", type="string", example="Sự kiện rất hoành tráng"),
      *                         @OA\Property(property="content", type="string", example="Chào mừng tổng thống"),
      *                         @OA\Property(property="attendances_count", type="integer", example=3),
      *                         @OA\Property(
@@ -589,7 +636,7 @@ class eventController extends Controller
 //                $event->banner = $imageUrl; // Thay đổi giá trị trường `url` của mỗi đối tượng
 //                return $event;
 //            });
-            return response()->json(handleData($status,$event), Response::HTTP_OK);
+            return response()->json(handleData($status, $event), Response::HTTP_OK);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => $e->getMessage(),
@@ -597,11 +644,12 @@ class eventController extends Controller
                 'statusCode' => $e instanceof HttpException
                     ? $e->getStatusCode()
                     : Response::HTTP_INTERNAL_SERVER_ERROR
-            ],  $e instanceof HttpException
+            ], $e instanceof HttpException
                 ? $e->getStatusCode()
                 : Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
     /**
      * @OA\Post(
      *     path="/api/recreateEvent",
@@ -643,7 +691,6 @@ class eventController extends Controller
      *                           @OA\Property(property="banner", type="string", example="http://127.0.0.1:8000/Upload/1702785355.jpg"),
      *                           @OA\Property(property="start_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
      *                           @OA\Property(property="end_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
-     *                                  @OA\Property(property="description", type="string", example="Sự kiện rất hoành tráng"),
      *                       @OA\Property(property="content", type="string", example="Chào mừng tổng thống"),
      *                           @OA\Property(property="attendances_count", type="interger", example=3),
      * @OA\Property(
@@ -747,7 +794,7 @@ class eventController extends Controller
                 'statusCode' => $e instanceof HttpException
                     ? $e->getStatusCode()
                     : Response::HTTP_INTERNAL_SERVER_ERROR
-            ],  $e instanceof HttpException
+            ], $e instanceof HttpException
                 ? $e->getStatusCode()
                 : Response::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -777,9 +824,9 @@ class eventController extends Controller
      *             @OA\Property(property="location", type="string", example="Hai Phong"),
      *             @OA\Property(property="contact", type="string", example="0983467584"),
      *             @OA\Property(property="banner", type="string",format = "binary", example="anh1.jpg"),
+     *             @OA\Property(property="description", type="string", example="Sự kiện rất hoành tráng"),
      *             @OA\Property(property="start_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
      *             @OA\Property(property="end_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
-     *                                   @OA\Property(property="description", type="string", example="Sự kiện rất hoành tráng"),
      *                       @OA\Property(property="content", type="string", example="Chào mừng tổng thống"),
      *      @OA\Property(property="keywords",type="array",@OA\Items(type="integer"),example="[1, 2]")
      *         )
@@ -862,19 +909,26 @@ class eventController extends Controller
 //                }
 //            },
 //        ]
+//        'description' => 'required',
+
+//        old
+//        'user_id' => ['required',Rule::exists('users', 'id')->where(function ($query) {
+//        $query->whereIn('role', [1, 2]);
+//    })]
+
         $validate = Validator::make($request->all(), [
             'name' => ['required'],
             'location' => ['required'],
+            'description' => 'required',
             'contact' => [
                 'required',
                 'regex:/^(\+?\d{1,3}[- ]?)?\d{10}$/'
             ],
-        'banner' => 'required',
+            'banner' => 'required',
             'start_time' => ['required'],
             'end_time' => ['required', 'after:start_time'],
-            'description' => 'required',
             'content' => 'required',
-            'keywords' =>[   'array',
+            'keywords' => ['array',
                 'min:1', // ít nhất một phần tử trong mảng
                 Rule::exists('keywords', 'id')]
         ], [
@@ -884,13 +938,13 @@ class eventController extends Controller
             'contact.regex' => 'Định dạng số điện thoại được nhập không đúng',
             'banner.image' => 'Vui lòng upload banner định dạng file',
             'banner.mimes' => 'Vui lòng upload banner định dạng jpeg,png,jpg,gif,svg',
-            'user_id.required' => 'User Id không được để trống',
+//            'user_id.required' => 'User Id không được để trống',
             'banner.required' => 'Ảnh sự kiện bắt buộc phải có',
             'start_time.required' => 'Ngày khởi đầu của event không được để trống',
             'end_time.required' => 'Ngày kết thúc của event không được để trống',
             'end_time.after' => 'Ngày kết thúc của dự án phải lớn hơn ngày bắt đầu',
             'description.required' => 'Không được để trống trường mô tả',
-            'user_id.exists' => 'Role của userid không hợp lệ.',
+//            'user_id.exists' => 'Role của userid không hợp lệ hoặc người dùng không tồn tại',
             'content.required' => 'Không được để trống trường nội dung',
             'keywords.array' => 'keywords Phải là 1 array',
             'keywords.min' => 'Keywords Phải có ít nhất 1 phần tủ',
@@ -900,7 +954,7 @@ class eventController extends Controller
             //            dd($validate->errors());
             return response([
                 "status" => "error",
-                "message" => $validate->errors(),
+                "message" => $validate->errors()->all(),
                 'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -920,19 +974,18 @@ class eventController extends Controller
 //                asset("Upload/{$returnData->banner}")
 //                $returnData->banner = $imageName;
 //                dd($request->keywords);
-                if(!empty($request->keywords)){
+                if (!empty($request->keywords)) {
 //                    dd($request->keywords);
 //                    $keywordsReply = Str::of($request->keywords)->trim('[]')->explode(',');
                     $dataKeywords = collect($request->keywords)->map(function ($keywordId) use ($event) {
                         return [
-                            'keywords_id' => (int) $keywordId,
+                            'keywords_id' => (int)$keywordId,
                             'event_id' => $event->id,
                         ];
                     })->toArray();
                     events_keywords::insert($dataKeywords);
                     $returnData->event_keywords = $returnData->eventKeywords;
                 }
-
 
 
                 return response()->json([
@@ -968,6 +1021,7 @@ class eventController extends Controller
      *      summary="Lấy dữ liệu sự kiện từ một id cho trước",
      *      description="
      * -Endpoint này lấy ra 1 bản ghi của sự kiện
+     * - status_feedback <1|0> 1 là đã phản hồi sự kiện 0 là chưa phản hồi
      * -id là id của event mà mình cần tìm kiếm",
      *      @OA\Parameter(
      *          name="id",
@@ -993,7 +1047,6 @@ class eventController extends Controller
      *                           @OA\Property(property="banner", type="string", example="http://127.0.0.1:8000/Upload/1702785355.jpg"),
      *                           @OA\Property(property="start_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
      *                           @OA\Property(property="end_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
-     *                                  @OA\Property(property="description", type="string", example="Sự kiện rất hoành tráng"),
      *                       @OA\Property(property="content", type="string", example="Chào mừng tổng thống"),
      *                           @OA\Property(property="attendances_count", type="interger", example=3),
      * @OA\Property(
@@ -1044,27 +1097,44 @@ class eventController extends Controller
                     $join->on('events.id', '=', 'atendances.event_id')
                         ->where('atendances.user_id', '=', Auth::user()->id);
                 })
-                    ->select('events.*')
-                    ->selectSub(function ($query) {
-                        $query->selectRaw('IF(COUNT(atendances.id) > 0, 1, 0) as status_join')
-                            ->from('atendances')
-                            ->whereColumn('atendances.event_id', 'events.id')
-                            ->where('atendances.user_id', Auth::user()->id);
-                    }, 'status_join')
+                ->select('events.*')
+                ->selectSub(function ($query) {
+                    $query->selectRaw('IF(COUNT(atendances.id) > 0, 1, 0) as status_join')
+                        ->from('atendances')
+                        ->whereColumn('atendances.event_id', 'events.id')
+                        ->where('atendances.user_id', Auth::user()->id);
+                }, 'status_join')
+                ->selectSub(function ($query) {
+                    $query->selectRaw('IF(COUNT(feedback.id) > 0, 1, 0) as status_feedBack_join')
+                        ->from('feedback')
+                        ->whereColumn('feedback.event_id', 'events.id')
+                        ->where('feedback.user_id', Auth::user()->id);
+                }, 'status_feedBack_join')
+//                ->selectSub(function ($query) {
+//                    $query->selectRaw('IF(COUNT(feedback.id) > 0, 1, 0) as status_feedback')
+//                        ->from('feedback')
+//                        ->whereColumn('feedback.event_id', 'events.id')
+//                        ->where('feedback.user_id', Auth::user()->id);
+//                }, 'status_feedback')
                 ->with([
-                'feedback' => function ($query) {
-                $query->with('user');
-            }
-            ])
-                ->with([
-                'attendances' => function ($query) {
-                $query->with('user');
-            }
-            ])
-                ->with('keywords')
-                ->with('user')
+                    'feedback' => function ($query) {
+                        $query->with('user');
+                    },
+                    'keywords',
+                    'user',
+                    'notifications' => function ($query) {
+                        $query->with('create_by');
+                    },
+                    'attendances' => function ($query) {
+                        $query->with('user')->select('atendances.*')
+                            ->selectSub(function ($subQuery) {
+                                $subQuery->selectRaw('IF(COUNT(feedback.id) > 0, 1, 0) as status_feedback')
+                                    ->from('feedback')
+                                    ->whereColumn('feedback.event_id', 'atendances.event_id')
+                                    ->whereColumn('feedback.user_id', '=', 'atendances.user_id');
+                            }, 'status_feedback');
+                    }])
                 ->findOrFail($id);
-//            $event->banner = url("Upload/{$event->banner}");
             return response()->json([
                 'metadata' => $event,
                 'message' => 'Get One Record Successfully',
@@ -1079,6 +1149,7 @@ class eventController extends Controller
             ], Response::HTTP_NOT_FOUND);
         }
     }
+
     /**
      * @OA\Post(
      *     path="/api/eventStatistics",
@@ -1130,7 +1201,6 @@ class eventController extends Controller
      * @OA\Property(property="banner", type="string", example="http://127.0.0.1:8000/Upload/1702785355.jpg"),
      *                           @OA\Property(property="start_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
      *                           @OA\Property(property="end_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
-     *                                   @OA\Property(property="description", type="string", example="Sự kiện rất hoành tráng"),
      *                       @OA\Property(property="content", type="string", example="Chào mừng tổng thống"),
      *                           @OA\Property(property="attendances_count", type="integer", example=0),
      *                           @OA\Property(property="feedback", type="array", @OA\Items(
@@ -1249,7 +1319,7 @@ class eventController extends Controller
 //                $event->banner = $imageUrl; // Thay đổi giá trị trường `url` của mỗi đối tượng
 //                return $event;
 //            });
-            return response()->json(handleData($status,$eventInWeek), Response::HTTP_OK);
+            return response()->json(handleData($status, $eventInWeek), Response::HTTP_OK);
         }
         $validator = Validator::make($request->all(), [
             'start_time' => 'required',
@@ -1301,7 +1371,6 @@ class eventController extends Controller
     }
 
     /**
-     * /**
      * @OA\Patch(
      *     path="/api/event/{id}",
      *     operationId="updateEvent",
@@ -1319,14 +1388,14 @@ class eventController extends Controller
      * -keywords là mảng chứa id keyword cần cập nhật ( Lưu ý : phải tồn tại keywords đó)
      * ",
      *     operationId="eventPut",
-     *     @OA\Parameter(
+     * @OA\Parameter(
      *         name="id",
      *         description="ID của một sự kiện",
      *         required=true,
      *         in="path",
      *         @OA\Schema(type="integer")
      *     ),
-     *     @OA\RequestBody(
+     * @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
      *             @OA\Property(property="name", type="string", example="Event Name"),
@@ -1336,12 +1405,11 @@ class eventController extends Controller
      * @OA\Property(property="banner", type="string", example="anh1.jpg"),
      *             @OA\Property(property="start_time", type="string", format="date-time", example="2023-11-23 11:20:22"),
      *             @OA\Property(property="end_time", type="string", format="date-time", example="2023-11-23 11:20:22"),
-     *                                   @OA\Property(property="description", type="string", example="Sự kiện rất hoành tráng"),
      *                       @OA\Property(property="content", type="string", example="Chào mừng tổng thống"),
      *       *      @OA\Property(property="keywords",type="array",@OA\Items(type="integer"),example="[1, 2]")
      *         )
      *     ),
-     *     @OA\Response(
+     * @OA\Response(
      *         response=200,
      *         description="Sửa dữ liệu thành công",
      *         @OA\JsonContent(
@@ -1357,7 +1425,6 @@ class eventController extends Controller
      * @OA\Property(property="banner", type="string", example="http://127.0.0.1:8000/Upload/1702785355.jpg"),
      *                 @OA\Property(property="start_time", type="string", format="date-time", example="2023-11-23 11:20:22"),
      *                 @OA\Property(property="end_time", type="string", format="date-time", example="2023-11-23 11:20:22"),
-     *                                   @OA\Property(property="description", type="string", example="Sự kiện rất hoành tráng"),
      *                       @OA\Property(property="content", type="string", example="Chào mừng tổng thống"),
      * @OA\Property(property="attendances_count", type="integer", example=3),
      * @OA\Property(
@@ -1376,7 +1443,7 @@ class eventController extends Controller
      *             )
      *         )
      *     ),
-     *     @OA\Response(
+     * @OA\Response(
      *         response=404,
      *         description="Bản ghi không tồn tại ",
      *         @OA\JsonContent(
@@ -1386,7 +1453,7 @@ class eventController extends Controller
      *             @OA\Property(property="statusCode", type="integer", example=404)
      *         )
      *     ),
-     *     @OA\Response(
+     * @OA\Response(
      *         response=500,
      *         description="Lỗi hệ thống",
      *         @OA\JsonContent(
@@ -1402,6 +1469,7 @@ class eventController extends Controller
     {
         //Check validate
 //        dd($request->all());
+
         $validate = Validator::make($request->all(), [
             'contact' => [
                 'regex:/^(\+?\d{1,3}[- ]?)?\d{10}$/'
@@ -1410,7 +1478,7 @@ class eventController extends Controller
                 Rule::in([0, 1, 2])
             ],
             'end_time' => ['after:start_time'],
-            'keywords' =>['array',
+            'keywords' => ['array',
                 'min:1', // ít nhất một phần tử trong mảng
                 Rule::exists('keywords', 'id')]
         ], [
@@ -1420,7 +1488,7 @@ class eventController extends Controller
             'contact.regex' => 'Định dạng số điện thoại được nhập không đúng',
             'status.required' => 'Trạng thái của sự kiện không được để trống',
             'status.in' => 'Vui lòng nhập đúng trạng thái',
-            'user_id.required' => 'User Id không được để trống',
+//            'user_id.required' => 'User Id không được để trống',
             'start_time.required' => 'Ngày khởi đầu của event không được để trống',
             'end_time.required' => 'Ngày kết thúc của event không được để trống',
             'banner.required' => 'Không được để trống ảnh',
@@ -1467,19 +1535,19 @@ class eventController extends Controller
 //                $request->banner->move(public_path('Upload'), $img);
 //                Storage::disk('public')->put('Upload/' . $imageName, base64_decode($image));
 //                $imageUrl = Storage::url($imagePath);
-                $resourceData = $request->only(['name', 'location','contact','status','banner','start_time','end_time','description','content','user_id','keywords']);
+                $resourceData = $request->only(['name', 'location', 'contact', 'status','description', 'banner', 'start_time', 'end_time', 'content', 'user_id', 'keywords']);
 //                $resourceData['banner'] = $imageName;
-                $resourceData['user_id'] = Auth::user()->id;
+//                $resourceData['user_id'] = Auth::user()->id;
 //                $resourceData
                 $event->update($resourceData);
 //                url("Upload/{$event->banner}")
 //                $event->banner = url(Storage::url("Upload/{$imageName}"));
 //                dd($event->banner);
-                if(!empty($request->keywords)){
-                    events_keywords::where("event_id",$event->id)->delete();
+                if (!empty($request->keywords)) {
+                    events_keywords::where("event_id", $event->id)->delete();
                     $dataKeywords = collect($request->keywords)->map(function ($keywordId) use ($event) {
                         return [
-                            'keywords_id' => (int) $keywordId,
+                            'keywords_id' => (int)$keywordId,
                             'event_id' => $event->id,
                         ];
                     })->toArray();
@@ -1543,7 +1611,6 @@ class eventController extends Controller
      *                       @OA\Property(property="banner", type="string", example="http://127.0.0.1:8000/Upload/1702785355.jpg"),
      *                       @OA\Property(property="start_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
      *                       @OA\Property(property="end_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
-     *                                   @OA\Property(property="description", type="string", example="Sự kiện rất hoành tráng"),
      *                       @OA\Property(property="content", type="string", example="Chào mừng tổng thống"),
      * @OA\Property(property="attendances_count", type="interger", example=3),
      * @OA\Property(
@@ -1610,7 +1677,7 @@ class eventController extends Controller
 //            $imagePath = public_path('Upload/' . $event->banner);
 //            File::delete($imagePath);
 //            Storage::disk('public')->delete('Upload/' .$event->getRawOriginal('banner'));
-            events_keywords::where("event_id",$event->id)->delete();
+            events_keywords::where("event_id", $event->id)->delete();
             $event->delete();
             $restOfEvents = event::with('user')->get();
 //            $restOfEvents->map(function ($event) {
@@ -1632,6 +1699,7 @@ class eventController extends Controller
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
     /**
      * @OA\Get(
      *      path="/api/statistics",
@@ -1695,13 +1763,13 @@ class eventController extends Controller
     {
         // return auth()->user();
 //        dd(Auth::user()->role);
-         if (Auth::user()->role != 2) {
-             return response()->json([
-                 'message' => 'Không phải quản lí thì không có quyền vào xem thống kê',
-                 'status' => 'error',
-                 'statusCode' => Response::HTTP_FORBIDDEN
-             ], Response::HTTP_FORBIDDEN);
-         }
+        if (Auth::user()->role != 2) {
+            return response()->json([
+                'message' => 'Không phải quản lí thì không có quyền vào xem thống kê',
+                'status' => 'error',
+                'statusCode' => Response::HTTP_FORBIDDEN
+            ], Response::HTTP_FORBIDDEN);
+        }
         $currentTime = Carbon::now();
         $dayIncurrentMonth = $currentTime->daysInMonth;
         $firstDayOfMonth = Carbon::now()->startOfMonth();
@@ -1772,65 +1840,152 @@ class eventController extends Controller
         ], Response::HTTP_OK);
     }
 
-/**
- * @OA\Get(
- *     path="/api/getNearstEvent",
- *     summary="Lấy tất cả các sự kiện diễn ra gần nhất",
- *     tags={"Event"},
- *     description="Endpoint trả về thông tin của 5 sự kiện đang và sắp diễn ra gần nhất",
- *     @OA\Response(
- *         response=200,
- *         description="Successful operation",
- *         @OA\JsonContent(
- *             type="object",
- *             @OA\Property(property="status", type="string", example="success"),
- *             @OA\Property(property="message", type="string", example="Lấy dữ liệu thành công"),
- *             @OA\Property(property="statusCode", type="integer", example=200),
- *             @OA\Property(property="metadata", type="array",
- *                 @OA\Items(
- *                     type="object",
- *                     @OA\Property(property="name", type="string", example="Event Name"),
- *                     @OA\Property(property="location", type="string", example="Ha Noi"),
- *                     @OA\Property(property="contact", type="string", example="0986567467"),
- *                     @OA\Property(property="user_id", type="integer", example=2),
- *                     @OA\Property(property="banner", type="string", example="http://127.0.0.1:8000/Upload/1702785355.jpg"),
- *                     @OA\Property(property="start_time", type="string", format="date-time", example="2023-11-23 11:20:22"),
- *                     @OA\Property(property="end_time", type="string", format="date-time", example="2023-11-23 11:20:22"),
- *                     @OA\Property(property="description", type="string", example="Sự kiện rất hoành tráng"),
- *                     @OA\Property(property="content", type="string", example="Chào mừng tổng thống"),
- *                     @OA\Property(property="attendances_count", type="integer", example=3),
- *                 )
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=404,
- *         description="Không tìm thấy bản ghi",
- *         @OA\JsonContent(
- *             type="object",
- *             @OA\Property(property="status", type="string", example="error"),
- *             @OA\Property(property="message", type="string", example="Không tìm thấy bản ghi"),
- *             @OA\Property(property="statusCode", type="integer", example=404)
- *         )
- *     ),
- *     @OA\Response(
- *         response=500,
- *         description="Lỗi hệ thống",
- *         @OA\JsonContent(
- *             type="object",
- *             @OA\Property(property="status", type="string", example="error"),
- *             @OA\Property(property="message", type="string", example="Lỗi hệ thống"),
- *             @OA\Property(property="statusCode", type="integer", example=500)
- *         )
- *     )
- * )
- */
+    /**
+     * @OA\Get(
+     *     path="/api/eventStatisticsStudent",
+     *     summary="Lấy thông tin thống kê sinh viên join sự kiện theo tháng ,năm",
+     *     tags={"Event"},
+     *     description="Trả ra 12 tháng và số lượng sinh viên tham gia sự kiện trong tháng đó
+     *      - Param không bắt buộc là year (năm) , mặc định là năm hiện tại ",
+     * @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="message", type="string", example="Lấy dữ liệu thống kê thành công"),
+     *             @OA\Property(property="statusCode", type="integer", example=200),
+     *             @OA\Property(property="metadata", type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="name", type="string", example="Jan"),
+     *                     @OA\Property(property="total", type="integer", example=0),
+     *                 )
+     *             )
+     *         )
+     *     ),
+     * @OA\Response(
+     *         response=404,
+     *         description="Không tìm thấy bản ghi",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="error"),
+     *             @OA\Property(property="message", type="string", example="Không tìm thấy bản ghi"),
+     *             @OA\Property(property="statusCode", type="integer", example=404)
+     *         )
+     *     ),
+     * @OA\Response(
+     *         response=500,
+     *         description="Lỗi hệ thống",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="error"),
+     *             @OA\Property(property="message", type="string", example="Lỗi hệ thống"),
+     *             @OA\Property(property="statusCode", type="integer", example=500)
+     *         )
+     *     )
+     * )
+     */
+    public function StatisticsStudentJoin(Request $request)
+    {
+        if (Auth::user()->role != 2) {
+            return response()->json([
+                'message' => 'Không phải quản lí thì không có quyền vào xem thống kê',
+                'status' => 'error',
+                'statusCode' => Response::HTTP_FORBIDDEN
+            ], Response::HTTP_FORBIDDEN);
+        }
+        $year = $request->input('year') ?? Carbon::now()->year;
+        $months = [
+            '01' => 'Jan', '02' => 'Feb', '03' => 'Mar', '04' => 'Apr',
+            '05' => 'May', '06' => 'Jun', '07' => 'Jul', '08' => 'Aug',
+            '09' => 'Sep', '10' => 'Oct', '11' => 'Nov', '12' => 'Dec',
+        ];
+
+        $statistics = atendance::select(
+            DB::raw("DATE_FORMAT(created_at, '%b') as month_name"),
+            DB::raw("DATE_FORMAT(created_at, '%m') as month_number"), // Lấy số tháng
+            DB::raw('COUNT(*) as total_students')
+        )
+            ->whereYear('created_at', $year)
+            ->groupBy('month_number', 'month_name')
+            ->get();
+
+        $statisticsArray = [];
+
+        foreach ($months as $monthNumber => $monthName) {
+            $data = $statistics->firstWhere('month_number', $monthNumber);
+            $statisticsArray[] = [
+                'name' => $monthName,
+                'total' => $data ? $data->total_students : 0,
+            ];
+        }
+        return response()->json([
+            'metadata' => $statisticsArray,
+            'message' => 'Lấy thông tin thống kê thành công',
+            'status' => 'success',
+            'statusCode' => Response::HTTP_OK
+        ], Response::HTTP_OK);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/getNearstEvent",
+     *     summary="Lấy tất cả các sự kiện diễn ra gần nhất",
+     *     tags={"Event"},
+     *     description="Endpoint trả về thông tin của 5 sự kiện đang và sắp diễn ra gần nhất",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="message", type="string", example="Lấy dữ liệu thành công"),
+     *             @OA\Property(property="statusCode", type="integer", example=200),
+     *             @OA\Property(property="metadata", type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="name", type="string", example="Event Name"),
+     *                     @OA\Property(property="location", type="string", example="Ha Noi"),
+     *                     @OA\Property(property="contact", type="string", example="0986567467"),
+     *                     @OA\Property(property="user_id", type="integer", example=2),
+     *                     @OA\Property(property="banner", type="string", example="http://127.0.0.1:8000/Upload/1702785355.jpg"),
+     *                     @OA\Property(property="start_time", type="string", format="date-time", example="2023-11-23 11:20:22"),
+     *                     @OA\Property(property="end_time", type="string", format="date-time", example="2023-11-23 11:20:22"),
+     *                     @OA\Property(property="content", type="string", example="Chào mừng tổng thống"),
+     *                     @OA\Property(property="attendances_count", type="integer", example=3),
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Không tìm thấy bản ghi",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="error"),
+     *             @OA\Property(property="message", type="string", example="Không tìm thấy bản ghi"),
+     *             @OA\Property(property="statusCode", type="integer", example=404)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Lỗi hệ thống",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="error"),
+     *             @OA\Property(property="message", type="string", example="Lỗi hệ thống"),
+     *             @OA\Property(property="statusCode", type="integer", example=500)
+     *         )
+     *     )
+     * )
+     */
     public function getNearstEvent()
     {
         $currentTime = Carbon::now();
-        $fiveEventNearst = event::where('status','>', 0)
+        $fiveEventNearst = event::where('status', '>', 0)
             ->where('start_time', '>=', $currentTime)
-            ->orWhere('start_time','<',$currentTime)
+            ->orWhere('start_time', '<', $currentTime)
             ->where('end_time', '>=', $currentTime)
             ->orderBy('start_time', 'asc')
             ->limit(5)

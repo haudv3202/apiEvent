@@ -24,9 +24,6 @@ use App\Http\Controllers\keywordsController;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
 
 // Google Sign In
 Route::post('/get-google-sign-in-url', [GoogleController::class, 'getGoogleSignInUrl']);
@@ -34,8 +31,10 @@ Route::get('/auth/google', [GoogleController::class, 'loginCallback']);
 Route::get('/callback', [GoogleController::class, 'callback']);
 //
 //Route::post('register',[UserAuthController::class,'register']);
-// Route::post('login',[UserAuthController::class,'login']);
-
+Route::post('login',[UserAuthController::class,'login']);
+Route::post('reset-password', [UserAuthController::class,'sendMail']);
+Route::post('check-password', [UserAuthController::class,'checkPass']);
+Route::put('reset-password/{token}', [UserAuthController::class,'reset']);
 //Route::apiResource('employees',EmployeeController::class)->middleware('auth:api');
 
 //Route::apiResource('atendances',atendanceController::class)->middleware('auth:api');
@@ -58,7 +57,12 @@ Route::middleware('auth:api')->prefix('feedback')->group(function() {
 //Route::apiResource('notification',notificationController::class)->middleware('auth:api');
 Route::middleware('auth:api')->prefix('notification')->group(function() {
     Route::post('/send',[notificationController::class,'create']);
+//    Route::get('/test',[notificationController::class,'test']);
     Route::get('/',[notificationController::class,'index']);
+//    Route::get('/search',[notificationController::class,'search']);
+    Route::get('/getNotificationDel/{id}',[notificationController::class,'showNotificationDel']);
+    Route::get('/restore/{id}',[notificationController::class,'restoreNotificationDel']);
+    Route::get('/settings/{id}',[notificationController::class,'getSettingsNotification']);
     Route::post('/',[notificationController::class,'store']);
     Route::get('/show/{id}',[notificationController::class,'show']);
     Route::patch('/{id}',[notificationController::class,'update']);
@@ -90,7 +94,8 @@ Route::prefix('event')->group(function() {
 
 //Test api in swagger donn't need token
 Route::apiResource('participants',participantsController::class)->middleware('auth:api');
-
+Route::patch('updateUser',[participantsController::class, 'updateUser'])->middleware('auth:api');
+Route::post('importUser',[participantsController::class,'importUser'])->middleware('auth:api');
 Route::get('resourceByEventID/{event_id}',[resourceController::class,'GetRecordByEventId'])->middleware('auth:api');
 Route::apiResource('resource',resourceController::class)->middleware('auth:api');
 
@@ -104,9 +109,8 @@ Route::get('messageBox/{event_id}', [chatController::class, 'showMessageInEvent'
 
 //Event statistics
 Route::get('statistics',[eventController::class,'Statistics'])->middleware('auth:api');
+Route::get('eventStatisticsStudent',[eventController::class,'StatisticsStudentJoin']);
 Route::get('getNearstEvent',[eventController::class,'getNearstEvent'])->middleware('auth:api');
 Route::post('eventStatistics',[eventController::class,'eventStatistics'])->middleware('auth:api');
 Route::post('recreateEvent',[eventController::class,'recreateEvent'])->middleware('auth:api');
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+

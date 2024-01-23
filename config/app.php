@@ -170,6 +170,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         Laravel\Socialite\SocialiteServiceProvider::class,
         Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
+        Maatwebsite\Excel\ExcelServiceProvider::class
     ])->toArray(),
 
     /*
@@ -186,6 +187,7 @@ return [
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
         'Socialite' => Laravel\Socialite\Facades\Socialite::class,
+        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
     ])->toArray(),
 
 ];
