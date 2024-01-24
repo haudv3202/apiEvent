@@ -241,7 +241,7 @@ class UserAuthController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             @OA\Property(property="email", type="string", format="email", description="User's email"),
-     *             @OA\Property(property="passowrd", type="string", format="password", description="User's password"),
+     *             @OA\Property(property="password", type="string", format="password", description="User's password"),
      *         )
      *     ),
      *     @OA\Response(

@@ -216,7 +216,7 @@
                                         "type": "string",
                                         "format": "email"
                                     },
-                                    "passowrd": {
+                                    "password": {
                                         "description": "User's password",
                                         "type": "string",
                                         "format": "password"
