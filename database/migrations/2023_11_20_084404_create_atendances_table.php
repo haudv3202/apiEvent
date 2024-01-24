@@ -16,6 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(User::class);
             $table->foreignIdFor(event::class);
+            $table->tinyInteger('rate')->nullable();
             $table->timestamps();
         });
     }

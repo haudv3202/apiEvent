@@ -1200,6 +1200,137 @@
                 }
             }
         },
+        "/api/attendances_rate": {
+            "patch": {
+                "tags": [
+                    "Attendances"
+                ],
+                "summary": "Rate a event",
+                "description": "\n     *          - Endpoint này cho phép người tham gia sự kiện đánh giá về sự kiện\n     *          - Trả về data của tất cả người dùng đánh giá\n     *          - event_id là id sự kiện tham gia\n     *          - rate là số lượng sao của người đánh giá\n     *          ",
+                "operationId": "2e04b42b849a70a32c9665e26afdbb36",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "event_id": {
+                                        "type": "integer",
+                                        "example": "1"
+                                    },
+                                    "rate": {
+                                        "type": "integer",
+                                        "example": "2"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Update One Record Successfully"
+                                        },
+                                        "metadata": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "event_id": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "rate": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-11-23 11:20:22"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-11-23 11:20:22"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Bản ghi không tồn tại ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Bản ghi không tồn tại "
+                                        },
+                                        "statusCode": {
+                                            "type": "integer",
+                                            "example": 404
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Lỗi hệ thống",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Lỗi hệ thống"
+                                        },
+                                        "statusCode": {
+                                            "type": "integer",
+                                            "example": 500
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/attendances/{atendance}": {
             "patch": {
                 "tags": [
@@ -1512,7 +1643,7 @@
                     "Event"
                 ],
                 "summary": "Lấy tất cả các sự kiện",
-                "description": "\n     *      - Endpoint trả về thông tin của tất cả các sự kiện\n     *      - Role được sử dụng là role của tất cả\n     *      - Trả về thông tin của tất cả các sự kiện đã diễn ra\n     *     - StatusJoin là xác đinh người dùng đang login vào đã tham gia những sự kiện nào\n     *     - Nếu là 1 thì là trạng thái người dùng đó đã tham gia\n     *     - 0 là trạng thái người dùng đó không tham gia\n     *     - Sẽ có 1 số option param sau\n     *     - page=<số trang> chuyển sang trang cần\n     *     - limit=<số record> số record muốn lấy trong 1 trang\n     *     - pagination=true|false sẽ là trạng thái phân trang hoặc không phân trang <mặc định là false phân trang>\n     *     - search=<nội dung muốn tìm kiếm >\n     *     - sort=<latest|oldest> mặc định sẽ là latest sẽ là sắp xếp ngày đăng mới nhất(oldest là cũ nhất)\n     * ",
+                "description": "\n     *      - Endpoint trả về thông tin của tất cả các sự kiện\n     *      - Role được sử dụng là role của tất cả\n     *      - Trả về thông tin của tất cả các sự kiện đã diễn ra\n     *     - StatusJoin là xác đinh người dùng đang login vào đã tham gia những sự kiện nào\n     *     - Nếu là 1 thì là trạng thái người dùng đó đã tham gia\n     *     - 0 là trạng thái người dùng đó không tham gia\n     *     - Sẽ có 1 số option param sau\n     *     - page=<số trang> chuyển sang trang cần\n     *     - limit=<số record> số record muốn lấy trong 1 trang\n     *     - pagination=true|false sẽ là trạng thái phân trang hoặc không phân trang <mặc định là false phân trang>\n     *     - search=<nội dung muốn tìm kiếm >\n     *     - sort=<latest|oldest> mặc định sẽ là latest sẽ là sắp xếp ngày đăng mới nhất(oldest là cũ nhất)\n     *     - star là số lượng sao mà sự kiện có nhiều nhất\n     * ",
                 "operationId": "1713890b60b4f32dcbc6113136f80b49",
                 "responses": {
                     "200": {
@@ -2015,6 +2146,10 @@
                                                             "attendances_count": {
                                                                 "type": "interger",
                                                                 "example": 3
+                                                            },
+                                                            "area": {
+                                                                "type": "string",
+                                                                "example": "Hà Nội"
                                                             },
                                                             "status_join": {
                                                                 "type": "interger",
@@ -2651,6 +2786,10 @@
                                                     "content": {
                                                         "type": "string",
                                                         "example": "Chào mừng tổng thống"
+                                                    },
+                                                    "area": {
+                                                        "type": "string",
+                                                        "example": "Hà Nội"
                                                     },
                                                     "attendances_count": {
                                                         "type": "interger",

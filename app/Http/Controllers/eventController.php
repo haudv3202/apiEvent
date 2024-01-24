@@ -42,6 +42,7 @@ class eventController extends Controller
      *     - pagination=true|false sẽ là trạng thái phân trang hoặc không phân trang <mặc định là false phân trang>
      *     - search=<nội dung muốn tìm kiếm >
      *     - sort=<latest|oldest> mặc định sẽ là latest sẽ là sắp xếp ngày đăng mới nhất(oldest là cũ nhất)
+     *     - star là số lượng sao mà sự kiện có nhiều nhất
      * ",
      * @OA\Response(
      *         response=200,
@@ -121,13 +122,13 @@ class eventController extends Controller
             $status = $request->query('pagination', false);
             $search = $request->query('search', '');
             $sort = $request->query('sort', 'latest');
+            $star = $request->query('star',null);
             //return $page;
 
             $query = event::where('name', 'like', "%{$search}%")
                 ->orWhere('location', 'like', "%{$search}%")
                 ->orWhere('contact', 'like', "%{$search}%")
                 ->orWhere('content', 'like', "%{$search}%")
-//            ->orWhere('description', 'like', "%{$search}%")
                 ->orWhere('start_time', 'like', "%{$search}%")
                 ->orWhere('end_time', 'like', "%{$search}%")
                 ->withCount('attendances')->with('user')->with('keywords')->with(['notifications',
@@ -254,6 +255,7 @@ class eventController extends Controller
      *                       @OA\Property(property="end_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
      *                       @OA\Property(property="content", type="string", example="Chào mừng tổng thống"),
      *                       @OA\Property(property="attendances_count", type="interger", example=3),
+     *                       @OA\Property(property="area", type="string", example="Hà Nội"),
      *                       @OA\Property(property="status_join", type="interger", example=1),
      *                       @OA\Property(
      *                          property="user",
@@ -692,6 +694,7 @@ class eventController extends Controller
      *                           @OA\Property(property="start_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
      *                           @OA\Property(property="end_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
      *                       @OA\Property(property="content", type="string", example="Chào mừng tổng thống"),
+     *                          @OA\Property(property="area", type="string", example="Hà Nội"),
      *                           @OA\Property(property="attendances_count", type="interger", example=3),
      * @OA\Property(
      *                     property="user",
@@ -930,7 +933,8 @@ class eventController extends Controller
             'content' => 'required',
             'keywords' => ['array',
                 'min:1', // ít nhất một phần tử trong mảng
-                Rule::exists('keywords', 'id')]
+                Rule::exists('keywords', 'id')],
+            'area' => 'required'
         ], [
             'name.required' => 'Không để trống name của của sự kiện nhập',
             'location.required' => 'Không được để trống địa điểm của sự kiện',
@@ -949,6 +953,7 @@ class eventController extends Controller
             'keywords.array' => 'keywords Phải là 1 array',
             'keywords.min' => 'Keywords Phải có ít nhất 1 phần tủ',
             'keywords.exists' => 'Trong số các keywords đẩy lên có 1 hoặc nhiều keywords không tồn tại,vui lòng thêm và thử lại',
+            'area.required' => 'Nơi tổ chức phải tồn tại'
         ]);
         if ($validate->fails()) {
             //            dd($validate->errors());

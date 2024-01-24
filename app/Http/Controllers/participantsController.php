@@ -205,11 +205,11 @@ class participantsController extends Controller
             $status = $request->query('pagination', false);
             $validator = Validator::make($request->all(), [
                 'email' => 'required',
-                'phone' => 'required'
+                'name' => 'required'
 
             ], [
                 'email.required' => 'Email không được để trống',
-                'phone.required' => 'Số điện thoại không được để trống'
+                'name.required' => 'Tên không được để trống'
             ]);
             if ($validator->fails()) {
                 return response([
@@ -220,19 +220,19 @@ class participantsController extends Controller
             }
             $data = $request->all();
             $email = $data['email'];
-            $phone = $data['phone'];
+            $name = $data['name'];
             $query = User::
-            where(function ($query) use ($email, $phone) {
+            where(function ($query) use ($email, $name) {
                 $query->where('email', 'like', "%{$email}%")
-                    ->orWhere('phone', 'like', "%{$phone}%");
+                    ->orWhere('name', 'like', "%{$name}%");
             });
             $users = ($status) ? $query->get() : $query->paginate($limit, ['*'], 'page', $page);
             if ($page > $users->lastPage()) {
                 $page = 1;
                 $users = User::
-                where(function ($query) use ($email, $phone) {
+                where(function ($query) use ($email, $name) {
                     $query->where('email', 'like', "%{$email}%")
-                        ->orWhere('phone', 'like', "%{$phone}%");
+                        ->orWhere('phone', 'like', "%{$name}%");
                 })
                     ->paginate($limit, ['*'], 'page', $page);
             }

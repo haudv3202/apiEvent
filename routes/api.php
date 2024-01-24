@@ -44,6 +44,7 @@ Route::middleware('auth:api')->prefix('attendances')->group(function() {
     Route::post('/',[atendanceController::class,'store']);
     Route::get('/{id}',[atendanceController::class,'show']);
     Route::patch('/{id}',[atendanceController::class,'update']);
+    Route::patch('/attendances_rate',[atendanceController::class,'rate']);
     Route::delete('/{id}',[atendanceController::class,'destroy']);
 });
 //Route::apiResource('feedback',feedbackController::class)->middleware('auth:api');

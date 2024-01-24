@@ -13,6 +13,7 @@ use Illuminate\Http\Response;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\Models\User;
+
 class atendanceController extends Controller
 {
     /**
@@ -92,25 +93,25 @@ class atendanceController extends Controller
      *     )
      * )
      */
-    public function index($id_event,Request $request)
+    public function index($id_event, Request $request)
     {
         try {
             $page = $request->query('page', 1);
             $limit = $request->query('limit', 10);
             $status = $request->query('pagination', false);
             $user = Auth::user();
-            if($user == null || $user->role == 0){
+            if ($user == null || $user->role == 0) {
                 return response([
                     "status" => "error",
                     "message" => "Role người dùng không hợp lệ",
                     'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR
                 ], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
-            $query = atendance::where('event_id',$id_event)->with('user');
+            $query = atendance::where('event_id', $id_event)->with('user');
             $atendance = ($status) ? $query->get() : $query->paginate($limit, ['*'], 'page', $page);
             if (!$status && $page > $atendance->lastPage()) {
                 $page = 1;
-                $atendance = atendance::where('event_id',$id_event)->with('user')->paginate($limit, ['*'], 'page', $page);
+                $atendance = atendance::where('event_id', $id_event)->with('user')->paginate($limit, ['*'], 'page', $page);
             }
             $data = ($status) ? [
                 'metadata' => $atendance,
@@ -127,8 +128,8 @@ class atendanceController extends Controller
                     'pagingCounter' => $atendance->currentPage(), // Bạn có thể sử dụng currentPage hoặc số khác nếu cần
                     'hasPrevPage' => $atendance->previousPageUrl() != null,
                     'hasNextPage' => $atendance->nextPageUrl() != null
-//                    'prevPage' => $atendance->previousPageUrl(),
-//                    'nextPage' =>$atendance->nextPageUrl(),
+                    //                    'prevPage' => $atendance->previousPageUrl(),
+                    //                    'nextPage' =>$atendance->nextPageUrl(),
                 ],
                 'message' => 'Lấy thành công tất cả các bản ghi',
                 'status' => 'success',
@@ -145,7 +146,6 @@ class atendanceController extends Controller
             ], $e instanceof HttpException
                 ? $e->getStatusCode()
                 : Response::HTTP_INTERNAL_SERVER_ERROR);
-
         }
     }
 
@@ -214,21 +214,21 @@ class atendanceController extends Controller
                 'event_id' => 'required|exists:events,id',
             ], [
                 'event_id.required' => 'Id sự kiện không được để trống',
-//                'user_id.required' => 'Id người dùng không được để trống.',
-//                'user_id.exists' => 'Người dùng không tồn tại.',
+                //                'user_id.required' => 'Id người dùng không được để trống.',
+                //                'user_id.exists' => 'Người dùng không tồn tại.',
                 'event_id.exists' => 'Sự kiện không tồn tại.'
             ]);
 
             if ($validator->fails()) {
-//                return response(['status' => 'error', 'message' => $validator->errors()], 500);
+                //                return response(['status' => 'error', 'message' => $validator->errors()], 500);
                 return response([
                     "status" => "error",
                     "message" => $validator->errors()->all(),
                     'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR
                 ], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
-            $atendance = atendance::where('user_id',Auth::user()->id)->where('event_id',$request->event_id)->first();
-            if($atendance){
+            $atendance = atendance::where('user_id', Auth::user()->id)->where('event_id', $request->event_id)->first();
+            if ($atendance) {
                 return response([
                     "status" => "error",
                     "message" => "Người dùng đã tồn tại trong sự kiện này",
@@ -237,7 +237,7 @@ class atendanceController extends Controller
             }
 
             $event = event::find($request->event_id);
-            if($event->status == 0){
+            if ($event->status == 0) {
                 return response([
                     "status" => "error",
                     "message" => "Sự kiện này đã kết thúc không thể tham gia",
@@ -245,10 +245,10 @@ class atendanceController extends Controller
                 ], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
 
-           atendance::create([
-               'user_id' => Auth::user()->id,
-               'event_id' => $request->event_id
-           ]);
+            atendance::create([
+                'user_id' => Auth::user()->id,
+                'event_id' => $request->event_id
+            ]);
             $usersInEvent = atendance::where('event_id', $request->event_id)
                 ->with('user')
                 ->get();
@@ -347,7 +347,8 @@ class atendanceController extends Controller
      * )
      */
 
-    public function addEmail(Request $request){
+    public function addEmail(Request $request)
+    {
         try {
             $validator = Validator::make($request->all(), [
                 'event_id' => 'required|exists:events,id',
@@ -362,7 +363,7 @@ class atendanceController extends Controller
             ]);
 
             if ($validator->fails()) {
-//                return response(['status' => 'error', 'message' => $validator->errors()], 500);
+                //                return response(['status' => 'error', 'message' => $validator->errors()], 500);
                 return response([
                     "status" => "error",
                     "message" => $validator->errors()->all(),
@@ -372,17 +373,17 @@ class atendanceController extends Controller
 
 
 
-            if(Auth::user()->role == 0){
+            if (Auth::user()->role == 0) {
                 return response([
                     "status" => "error",
                     "message" => "Role người tạo không hợp lệ.Vui lòng thử lại!!",
                     'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR
                 ], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
-            $id = User::select('id')->where('email',$request->email)->first()->id;
+            $id = User::select('id')->where('email', $request->email)->first()->id;
 
-            $atendance = atendance::where('user_id',$id)->where('event_id',$request->event_id)->first();
-            if($atendance){
+            $atendance = atendance::where('user_id', $id)->where('event_id', $request->event_id)->first();
+            if ($atendance) {
                 return response([
                     "status" => "error",
                     "message" => "Người dùng đã tồn tại trong sự kiện này",
@@ -391,7 +392,7 @@ class atendanceController extends Controller
             }
 
             $event = event::find($request->event_id);
-            if($event->status == 0){
+            if ($event->status == 0) {
                 return response([
                     "status" => "error",
                     "message" => "Sự kiện này đã kết thúc không thể tham gia",
@@ -494,7 +495,7 @@ class atendanceController extends Controller
         try {
 
             $usersInEvent = atendance::with('user')->findOrFail($id);
-//            dd($usersInEvent);
+            //            dd($usersInEvent);
             return response()->json([
                 'metadata' => $usersInEvent,
                 'message' => 'Lấy 1 bản ghi thành công',
@@ -508,6 +509,104 @@ class atendanceController extends Controller
                 'statusCode' => Response::HTTP_NOT_FOUND
             ], Response::HTTP_NOT_FOUND);
         }
+    }
+ 
+       /**
+     * @OA\Patch(
+     *     path="/api/attendances_rate",
+     *     summary="Rate a event",
+     *     tags={"Attendances"},
+     *     description="
+     *          - Endpoint này cho phép người tham gia sự kiện đánh giá về sự kiện
+     *          - Trả về data của tất cả người dùng đánh giá
+     *          - event_id là id sự kiện tham gia
+     *          - rate là số lượng sao của người đánh giá
+     *          ",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="event_id", type="integer", example="1"),
+     *             @OA\Property(property="rate", type="integer", example="2")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="message", type="string", example="Update One Record Successfully"),
+     *             @OA\Property(
+     *                 property="metadata",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="user_id", type="integer", example=1),
+     *                 @OA\Property(property="event_id", type="integer", example=2),
+     *                 @OA\Property(property="rate", type="integer", example=2),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-23 11:20:22"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-23 11:20:22")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Bản ghi không tồn tại ",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="error"),
+     *             @OA\Property(property="message", type="string", example="Bản ghi không tồn tại "),
+     *             @OA\Property(property="statusCode", type="integer", example=404)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Lỗi hệ thống",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="error"),
+     *             @OA\Property(property="message", type="string", example="Lỗi hệ thống"),
+     *             @OA\Property(property="statusCode", type="integer", example=500)
+     *         )
+     *     )
+     * )
+     */
+    public function rate(Request $request)
+    {
+        //validate request
+        $validator = Validator::make($request->all(), [
+            'rate' => 'required|min:0|max:5',
+            'event_id' => 'required|exists:events,id'
+        ], [
+            'rate.required' => 'Phai nhập số lượng star của người rate',
+            'rate.min' => 'Giá trị bé nhất của rate là 0 sao',
+            'rate.max' => 'Giá trị lớn nhất của rate là 5 sao',
+            'event_id.required' => 'Không được bỏ trống id event',
+            'event_id.exists' => 'event không tồn tại'
+        ]);
+        if ($validator->fails()) {
+            //                return response(['status' => 'error', 'message' => $validator->errors()], 500);
+            return response([
+                "status" => "error",
+                "message" => $validator->errors()->all(),
+                'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+        //check user is attending this event or not
+        $atendance = atendance::where('user_id', auth()->user()->id)->where('event_id', $request->event_id)->first();
+        if (!$atendance) {
+            return response([
+                "status" => "error",
+                "message" => "Người dùng  chưa tham gia sự kiện này",
+                'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+        $atendance->update(['rate' => $request->rate]);
+        return response()->json([
+            'metadata' => $atendance,
+            'message' => 'Người dùng đánh giá sự kiện thành công',
+            'status' => 'success',
+            'statusCode' => Response::HTTP_OK
+        ], Response::HTTP_OK);
     }
 
     /**
@@ -601,7 +700,7 @@ class atendanceController extends Controller
             }
 
 
-            if(Auth::user()->role == 0){
+            if (Auth::user()->role == 0) {
                 return response([
                     "status" => "error",
                     "message" => "Role người thực hiện không hợp lệ.Vui lòng thử lại!!",
@@ -610,7 +709,7 @@ class atendanceController extends Controller
             }
 
             $event = event::find($id);
-            if($event->status == 0){
+            if ($event->status == 0) {
                 return response([
                     "status" => "error",
                     "message" => "Sự kiện này đã kết thúc không thể cập nhật",
@@ -640,7 +739,6 @@ class atendanceController extends Controller
                 'statusCode' => Response::HTTP_NOT_FOUND
             ], Response::HTTP_NOT_FOUND);
         }
-
     }
 
     /**
@@ -729,7 +827,7 @@ class atendanceController extends Controller
 
 
             $user = Auth::user();
-            if($user->role == 0 || $user->role == 1){
+            if ($user->role == 0 || $user->role == 1) {
                 return response([
                     "status" => "error",
                     "message" => "Role người xóa không hợp lệ.Vui lòng thử lại!!",
@@ -738,7 +836,7 @@ class atendanceController extends Controller
             }
             $atendance->delete();
 
-            $usersInEvent = atendance::where('event_id',$idEvent)
+            $usersInEvent = atendance::where('event_id', $idEvent)
                 ->with('user')
                 ->get();
 
