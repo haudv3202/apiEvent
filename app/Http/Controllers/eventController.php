@@ -44,6 +44,7 @@ class eventController extends Controller
      *     - sort=<latest|oldest> mặc định sẽ là latest sẽ là sắp xếp ngày đăng mới nhất(oldest là cũ nhất)
      *     - status=<0|1|2> mặc định sẽ là tất cả sự kiện
      *    - area=<nội dung muốn tìm kiếm > tìm kiếm theo khu vực
+     *  -rating=<số sao muốn lọc>
      * ",
      * @OA\Response(
      *         response=200,
@@ -261,6 +262,7 @@ class eventController extends Controller
      *     - sort=<latest|oldest> mặc định sẽ là latest sẽ là sắp xếp ngày đăng mới nhất(oldest là cũ nhất)
      *    - status=<0|1|2> mặc định sẽ là tất cả sự kiện
      *   - area=<nội dung muốn tìm kiếm > tìm kiếm theo khu vực
+     *   -rating=<số sao muốn lọc>
      * ",
      * @OA\Response(
      *         response=200,
