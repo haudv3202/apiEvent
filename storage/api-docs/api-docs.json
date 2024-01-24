@@ -13,6 +13,541 @@
         "version": "1.0.0"
     },
     "paths": {
+        "/api/areas": {
+            "get": {
+                "tags": [
+                    "areas"
+                ],
+                "summary": "Lấy ra tất cả các cơ sở",
+                "description": "\n     *      - Endpoint này cho phép lấy ra thông tin các cơ sở.\n     *      - Role được sử dụng quản quản lí, nhân viên, sinh viên ",
+                "operationId": "d4807a1f6d2fa9fc7056e5a53e0c0f4e",
+                "responses": {
+                    "200": {
+                        "description": "Lấy ra tất cả các cơ sở",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Successfully retrieved all area"
+                                        },
+                                        "metadata": {
+                                            "properties": {
+                                                "docs": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": "1"
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Hà nội"
+                                                            },
+                                                            "description": {
+                                                                "type": "string",
+                                                                "example": "mô tả 1"
+                                                            },
+                                                            "created_at": {
+                                                                "type": "string",
+                                                                "format": "date-time",
+                                                                "example": "2023-11-28 17:02:29"
+                                                            },
+                                                            "updated_at": {
+                                                                "type": "string",
+                                                                "format": "date-time",
+                                                                "example": "2023-11-28 17:02:29"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "totalDocs": {
+                                                    "type": "integer",
+                                                    "example": 16
+                                                },
+                                                "limit": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "page": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "pagingCounter": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "hasPrevPage": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "hasNextPage": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        },
+                                        "statusCode": {
+                                            "type": "integer",
+                                            "example": 500
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "areas"
+                ],
+                "summary": "Tạo 1 cơ sở mới",
+                "description": "\n     *      - Endpoint này cho phép thêm cở sở mới.\n     *      - Trả về thông tin cơ sở đó.\n     *      - Role được sử dụng quản quản lí\n     *      - description là mô tả cơ sở đó <có thể để trống>",
+                "operationId": "areas",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Hà Nội"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Thêm cơ sở thành công"
+                                        },
+                                        "metadata": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": "3"
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Hà Nội"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "desribe"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-12-05T12:36:46.000000Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-12-05T12:36:46.000000Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Validation error or internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "object",
+                                            "example": {
+                                                "user_id": [
+                                                    "User does not exist"
+                                                ]
+                                            }
+                                        },
+                                        "statusCode": {
+                                            "type": "integer",
+                                            "example": 500
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/areas/{id}": {
+            "get": {
+                "tags": [
+                    "areas"
+                ],
+                "summary": "Lấy ra 1 cơ sở",
+                "description": "\n     *      - Endpoint này cho phép lấy ra thông tin 1 cơ sở.\n     *      - Role được sử dụng quản quản lí",
+                "operationId": "c88d5bea54305f6d8b7bf00390b3de38",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID của cơ sở",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": "1"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lấy ra 1 cơ sở",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Get One Record Successfully"
+                                        },
+                                        "metadata": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Hà nội"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "mô tả 1"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-11-28 17:02:29"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-11-28 17:02:29"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error hoặc không tìm thấy cơ sở",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Cơ sở không tồn tại"
+                                        },
+                                        "statusCode": {
+                                            "type": "integer",
+                                            "example": 500
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "areas"
+                ],
+                "summary": "Xóa 1 cơ sở",
+                "description": "\n     *      - Endpoint này cho phép xóa 1 cơ sở.\n     *      - Role được sử dụng quản quản lí",
+                "operationId": "Deleteareas",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID của cơ sở",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": "1"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Xóa 1 cơ sở thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Xóa cơ sở thành công"
+                                        },
+                                        "metadata": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Hà nội"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "mô tả 1"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-11-28 17:02:29"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-11-28 17:02:29"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error hoặc không tìm thấy cơ sở",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Cơ sở không tồn tại"
+                                        },
+                                        "statusCode": {
+                                            "type": "integer",
+                                            "example": 500
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "areas"
+                ],
+                "summary": "Cập nhật 1 cơ sở",
+                "description": "\n     *      - Endpoint này cho phép cập nhật thông tin 1 cơ sở.\n     *      - Role được sử dụng quản quản lí\n     *      - description là mô tả cơ sở đó <có thể để trống>",
+                "operationId": "updateAreas",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID của cơ sở",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": "1"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Hà Nội"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "mô tả 1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Cập nhật cơ sở thành công"
+                                        },
+                                        "metadata": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": "3"
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Hà Nội"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "desribe"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-12-05T12:36:46.000000Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-12-05 12:36:46"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Validation error or internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "object",
+                                            "example": {
+                                                "user_id": [
+                                                    "User does not exist"
+                                                ]
+                                            }
+                                        },
+                                        "statusCode": {
+                                            "type": "integer",
+                                            "example": 500
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/login": {
             "post": {
                 "tags": [
@@ -1512,7 +2047,7 @@
                     "Event"
                 ],
                 "summary": "Lấy tất cả các sự kiện",
-                "description": "\n     *      - Endpoint trả về thông tin của tất cả các sự kiện\n     *      - Role được sử dụng là role của tất cả\n     *      - Trả về thông tin của tất cả các sự kiện đã diễn ra\n     *     - StatusJoin là xác đinh người dùng đang login vào đã tham gia những sự kiện nào\n     *     - Nếu là 1 thì là trạng thái người dùng đó đã tham gia\n     *     - 0 là trạng thái người dùng đó không tham gia\n     *     - Sẽ có 1 số option param sau\n     *     - page=<số trang> chuyển sang trang cần\n     *     - limit=<số record> số record muốn lấy trong 1 trang\n     *     - pagination=true|false sẽ là trạng thái phân trang hoặc không phân trang <mặc định là false phân trang>\n     *     - search=<nội dung muốn tìm kiếm >\n     *     - sort=<latest|oldest> mặc định sẽ là latest sẽ là sắp xếp ngày đăng mới nhất(oldest là cũ nhất)\n     * ",
+                "description": "\n     *      - Endpoint trả về thông tin của tất cả các sự kiện\n     *      - Role được sử dụng là role của tất cả\n     *      - Trả về thông tin của tất cả các sự kiện đã diễn ra\n     *     - StatusJoin là xác đinh người dùng đang login vào đã tham gia những sự kiện nào\n     *     - Nếu là 1 thì là trạng thái người dùng đó đã tham gia\n     *     - 0 là trạng thái người dùng đó không tham gia\n     *     - Sẽ có 1 số option param sau\n     *     - page=<số trang> chuyển sang trang cần\n     *     - limit=<số record> số record muốn lấy trong 1 trang\n     *     - pagination=true|false sẽ là trạng thái phân trang hoặc không phân trang <mặc định là false phân trang>\n     *     - search=<nội dung muốn tìm kiếm >\n     *     - sort=<latest|oldest> mặc định sẽ là latest sẽ là sắp xếp ngày đăng mới nhất(oldest là cũ nhất)\n     *     - status=<0|1|2> mặc định sẽ là tất cả sự kiện\n     *    - area=<nội dung muốn tìm kiếm > tìm kiếm theo khu vực\n     * ",
                 "operationId": "1713890b60b4f32dcbc6113136f80b49",
                 "responses": {
                     "200": {
@@ -1720,7 +2255,7 @@
                     "Event"
                 ],
                 "summary": "Thêm mới bản ghi với dữ liệu được cung cấp",
-                "description": "\n     * - Endpoint trả về bản ghi mới được thêm vào\n     * -Role đước sử dụng là nhân viên, quản lí\n     * -name là tên sự kiện\n     * -location là nơi tổ chức sự kiện\n     * -contact là liên lạc bằng số điện thoại\n     * -banner là ảnh của sự kiện\n     * -start_time là thời gian bắt đầu sự kiện\n     * -end_time là thời gian kết thúc sự kiện\n     * - keywords là mảng chứa các id của keyword có thể để trống\n     * ",
+                "description": "\n     * - Endpoint trả về bản ghi mới được thêm vào\n     * -Role đước sử dụng là nhân viên, quản lí\n     * -name là tên sự kiện\n     * -location là nơi tổ chức sự kiện\n     * -contact là liên lạc bằng số điện thoại\n     * -banner là ảnh của sự kiện\n     * -start_time là thời gian bắt đầu sự kiện\n     * -end_time là thời gian kết thúc sự kiện\n     * - area là khu vực id tổ chức sự kiện\n     * - keywords là mảng chứa các id của keyword có thể để trống\n     * ",
                 "operationId": "storeEvent",
                 "requestBody": {
                     "required": true,
@@ -1739,6 +2274,10 @@
                                     "contact": {
                                         "type": "string",
                                         "example": "0983467584"
+                                    },
+                                    "area": {
+                                        "type": "integer",
+                                        "example": "1"
                                     },
                                     "banner": {
                                         "type": "string",
@@ -1863,6 +2402,10 @@
                                                                 "type": "integer",
                                                                 "example": "1"
                                                             },
+                                                            "area": {
+                                                                "type": "integer",
+                                                                "example": "1"
+                                                            },
                                                             "google_id": {
                                                                 "type": "string",
                                                                 "example": "137518716745268"
@@ -1951,7 +2494,7 @@
                     "Event"
                 ],
                 "summary": "Lấy tất cả các sự kiện đang tham gia",
-                "description": "\n     *      - Endpoint trả về thông tin của tất cả các sự kiện đang tham gia\n     *      - Role được sử dụng là role của tất cả\n     *      - Trả về thông tin của tất cả các sự kiện đã diễn ra\n     *     - StatusJoin là xác đinh người dùng đang login vào đã tham gia những sự kiện nào\n     *     - Nếu là 1 thì là trạng thái người dùng đó đã tham gia\n     *     - 0 là trạng thái người dùng đó không tham gia\n     *     - Sẽ có 1 số option param sau\n     *     - page=<số trang> chuyển sang trang cần\n     *     - limit=<số record> số record muốn lấy trong 1 trang\n     *     - pagination=true|false sẽ là trạng thái phân trang hoặc không phân trang <mặc định là false phân trang>\n     *     - search=<nội dung muốn tìm kiếm >\n     *     - sort=<latest|oldest> mặc định sẽ là latest sẽ là sắp xếp ngày đăng mới nhất(oldest là cũ nhất)\n     * ",
+                "description": "\n     *      - Endpoint trả về thông tin của tất cả các sự kiện đang tham gia\n     *      - Role được sử dụng là role của tất cả\n     *      - Trả về thông tin của tất cả các sự kiện đã diễn ra\n     *     - StatusJoin là xác đinh người dùng đang login vào đã tham gia những sự kiện nào\n     *     - Nếu là 1 thì là trạng thái người dùng đó đã tham gia\n     *     - 0 là trạng thái người dùng đó không tham gia\n     *     - Sẽ có 1 số option param sau\n     *     - page=<số trang> chuyển sang trang cần\n     *     - limit=<số record> số record muốn lấy trong 1 trang\n     *     - pagination=true|false sẽ là trạng thái phân trang hoặc không phân trang <mặc định là false phân trang>\n     *     - search=<nội dung muốn tìm kiếm >\n     *     - sort=<latest|oldest> mặc định sẽ là latest sẽ là sắp xếp ngày đăng mới nhất(oldest là cũ nhất)\n     *    - status=<0|1|2> mặc định sẽ là tất cả sự kiện\n     *   - area=<nội dung muốn tìm kiếm > tìm kiếm theo khu vực\n     * ",
                 "operationId": "ac569884d414a7347665d06b34b168aa",
                 "responses": {
                     "200": {
@@ -4182,6 +4725,10 @@
                                     "content": {
                                         "type": "string",
                                         "example": "Feedback content"
+                                    },
+                                    "rating": {
+                                        "type": "integer",
+                                        "example": "5"
                                     }
                                 },
                                 "type": "object"
@@ -6710,7 +7257,7 @@
                     "Participants"
                 ],
                 "summary": "Lấy tất cả bản ghi",
-                "description": "\n     *      - Endpoint trả về thôn tin của tất cả người dùng.\n     *      - Role được sử dụng là role quản lí\n     *      - Sẽ có 1 số option param sau\n     *     - page=<số trang> chuyển sang trang cần\n     *     - limit=<số record> số record muốn lấy trong 1 trang\n     *     - pagination=true|false sẽ là trạng thái phân trang hoặc không phân trang <mặc định là false phân trang>\n     *     - role=0|1|2 khi truyền thêm param này sẽ là lọc data trả ra các user có role nào < Mặc định là role 0>\n     *     ",
+                "description": "\n     *      - Endpoint trả về thôn tin của tất cả người dùng.\n     *      - Role được sử dụng là role quản lí\n     *      - Sẽ có 1 số option param sau\n     *     - page=<số trang> chuyển sang trang cần\n     *     - limit=<số record> số record muốn lấy trong 1 trang\n     *     - pagination=true|false sẽ là trạng thái phân trang hoặc không phân trang <mặc định là false phân trang>\n     *     - role=0|1|2 khi truyền thêm param này sẽ là lọc data trả ra các user có role nào < Mặc định là role 0>\n     *     - name=<tên người dùng> khi truyền thêm param này sẽ là lọc data trả ra các user có tên như thế < Mặc định là null>\n     *     - email=<email người dùng> khi truyền thêm param này sẽ là lọc data trả ra các user có email như thế < Mặc định là null>\n     *     ",
                 "operationId": "21e1cd188747fc59953037ea2feb3072",
                 "responses": {
                     "200": {

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class event extends Model
 {
     use HasFactory;
-    protected $fillable = ['name','location','contact','content','status','banner','description','user_id','start_time','end_time'];
+    protected $fillable = ['name','location','contact','content','status','banner','description','user_id','start_time','end_time','area_id'];
 //,'description'
     public function user()
     {
@@ -31,6 +31,10 @@ class event extends Model
 
     public function eventKeywords(){
         return $this->hasMany(events_keywords::class);
+    }
+
+    public function area(){
+        return $this->hasOne(area::class,'id','area_id');
     }
 
     public function keywords()

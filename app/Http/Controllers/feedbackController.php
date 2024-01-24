@@ -132,6 +132,7 @@ class feedbackController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="event_id", type="integer", example="1"),
      *             @OA\Property(property="content", type="string", example="Feedback content"),
+     *        @OA\Property(property="rating", type="integer", example="5")
      *         )
      *     ),
      *     @OA\Response(
@@ -184,13 +185,18 @@ class feedbackController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'content' => 'required',
-                'event_id' => 'required|exists:events,id'
+                'event_id' => 'required|exists:events,id',
+                'rating' => 'required|integer|min:1|max:5'
             ], [
                 'content.required' => 'Nội dung không được để trống',
                 'event_id.required' => 'ID của event không được để trống',
                 'user_id.required' => 'ID người dùng cũng không được để trống',
                 'user_id.exists' => 'Người dùng không tồn tại',
                 'event_id.exists' => 'Sự kiện không tồn tại',
+                'rating.required' => 'Rating không được để trống',
+                'rating.integer' => 'Rating phải là số nguyên',
+                'rating.min' => 'Rating phải lớn hơn 0',
+                'rating.max' => 'Rating phải nhỏ hơn 6',
             ]);
 
             if($validator->fails()){
@@ -214,7 +220,8 @@ class feedbackController extends Controller
             $feedback = feedback::create([
                 'content' => $request->input('content'),
                 'event_id' => $request->event_id,
-                'user_id' => Auth::user()->id
+                'user_id' => Auth::user()->id,
+                'rating' => $request->rating
             ]);
             $feedbackWithUser = feedback::with('user')->find($feedback->id);
             return response()->json([
@@ -444,7 +451,7 @@ class feedbackController extends Controller
                     'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR
                 ], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
-            $data = $request->only(['content', 'event_id']);
+            $data = $request->only(['content', 'event_id','rating','recommend']);
             $data['user_id'] = Auth::user()->id;
             $feedback->update($data);
             $feedbackWithUser = feedback::with('user')->find($id);

@@ -42,6 +42,8 @@ class eventController extends Controller
      *     - pagination=true|false sẽ là trạng thái phân trang hoặc không phân trang <mặc định là false phân trang>
      *     - search=<nội dung muốn tìm kiếm >
      *     - sort=<latest|oldest> mặc định sẽ là latest sẽ là sắp xếp ngày đăng mới nhất(oldest là cũ nhất)
+     *     - status=<0|1|2> mặc định sẽ là tất cả sự kiện
+     *    - area=<nội dung muốn tìm kiếm > tìm kiếm theo khu vực
      * ",
      * @OA\Response(
      *         response=200,
@@ -121,26 +123,40 @@ class eventController extends Controller
             $status = $request->query('pagination', false);
             $search = $request->query('search', '');
             $sort = $request->query('sort', 'latest');
+
+            $statusEvent = $request->query('status', '');
+            $areas= $request->query('area', '');
+            $rating = $request->query('rating', '');
+
             //return $page;
 
-            $query = event::where('name', 'like', "%{$search}%")
-                ->orWhere('location', 'like', "%{$search}%")
-                ->orWhere('contact', 'like', "%{$search}%")
-                ->orWhere('content', 'like', "%{$search}%")
-//            ->orWhere('description', 'like', "%{$search}%")
-                ->orWhere('start_time', 'like', "%{$search}%")
-                ->orWhere('end_time', 'like', "%{$search}%")
-                ->withCount('attendances')->with('user')->with('keywords')->with(['notifications',
-                    'attendances' => function ($query) {
-                        $query->with('user')->select('atendances.*')
-                            ->selectSub(function ($subQuery) {
-                                $subQuery->selectRaw('IF(COUNT(feedback.id) > 0, 1, 0) as status_feedback')
-                                    ->from('feedback')
-                                    ->whereColumn('feedback.event_id', 'atendances.event_id')
-                                    ->whereColumn('feedback.user_id', '=', 'atendances.user_id');
-                            }, 'status_feedback');
-                    }
-                ]);
+            $query = event::withCount('attendances')->with(['notifications','user','keywords',
+                'attendances' => function ($query) {
+                    $query->with('user')->select('atendances.*')
+                        ->selectSub(function ($subQuery) {
+                            $subQuery->selectRaw('IF(COUNT(feedback.id) > 0, 1, 0) as status_feedback')
+                                ->from('feedback')
+                                ->whereColumn('feedback.event_id', 'atendances.event_id')
+                                ->whereColumn('feedback.user_id', '=', 'atendances.user_id');
+                        }, 'status_feedback');
+                }
+            ]);
+            if ($search !== "") {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('location', 'like', "%{$search}%")
+                    ->orWhere('contact', 'like', "%{$search}%")
+                    ->orWhere('content', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('start_time', 'like', "%{$search}%")
+                    ->orWhere('end_time', 'like', "%{$search}%");
+            }
+            if ($areas !== "") {
+                $query->whereHas('area', function ($query) use ($areas) {
+                    $query->where('name', 'like', "%{$areas}%");
+                });
+            }else {
+                $query->with('area');
+            }
 
 
             $query->leftJoin('atendances', function ($join) {
@@ -154,8 +170,19 @@ class eventController extends Controller
                         ->whereColumn('atendances.event_id', 'events.id')
                         ->where('atendances.user_id', Auth::user()->id);
                 }, 'status_join');
-            $query->orderBy('id', ($sort) == 'oldest' ? 'asc' : 'desc');
 //            $event = ($status) ? $query->get() : $query->paginate($limit, ['*'], 'page', $page);
+            if ($rating !== "") {
+                $query->withCount(['feedback as user_feedback_count_rating' => function ($query) use ($rating) {
+                    $query->where('rating', $rating);
+                }])
+                    ->having('user_feedback_count_rating', '>', 0)
+                    ->orderBy('user_feedback_count_rating', ($sort) == 'oldest' ? 'asc' : 'desc');
+            }else {
+                $query->orderBy('id', ($sort) == 'oldest' ? 'asc' : 'desc');
+            }
+            if ($statusEvent !== "") {
+                $query->where('status', $statusEvent);
+            }
             if ($search) {
                 $event = ($status) ? $query->take($limit)->get() : $query->paginate($limit, ['*'], 'page', $page);
             } else {
@@ -232,6 +259,8 @@ class eventController extends Controller
      *     - pagination=true|false sẽ là trạng thái phân trang hoặc không phân trang <mặc định là false phân trang>
      *     - search=<nội dung muốn tìm kiếm >
      *     - sort=<latest|oldest> mặc định sẽ là latest sẽ là sắp xếp ngày đăng mới nhất(oldest là cũ nhất)
+     *    - status=<0|1|2> mặc định sẽ là tất cả sự kiện
+     *   - area=<nội dung muốn tìm kiếm > tìm kiếm theo khu vực
      * ",
      * @OA\Response(
      *         response=200,
@@ -311,16 +340,12 @@ class eventController extends Controller
             $status = $request->query('pagination', false);
             $search = $request->query('search', '');
             $sort = $request->query('sort', 'latest');
+            $statusEvent = $request->query('status', '');
+            $areas= $request->query('area', '');
+            $rating = $request->query('rating', '');
             //return $page;
 
-            $query = event::where('name', 'like', "%{$search}%")
-                ->orWhere('location', 'like', "%{$search}%")
-                ->orWhere('contact', 'like', "%{$search}%")
-                ->orWhere('content', 'like', "%{$search}%")
-//                ->orWhere('description', 'like', "%{$search}%")
-                ->orWhere('start_time', 'like', "%{$search}%")
-                ->orWhere('end_time', 'like', "%{$search}%")
-                ->withCount('attendances')->with('user')->with('keywords')->with([
+            $query = event::withCount('attendances')->with('user')->with('keywords')->with([
                     'notifications',
                     'attendances' => function ($query) {
                         $query->with('user')->select('atendances.*')
@@ -332,6 +357,31 @@ class eventController extends Controller
                             }, 'status_feedback');
                     }
                 ]);
+
+            if ($search !== "") {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('location', 'like', "%{$search}%")
+                    ->orWhere('contact', 'like', "%{$search}%")
+                    ->orWhere('content', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('start_time', 'like', "%{$search}%")
+                    ->orWhere('end_time', 'like', "%{$search}%");
+            }
+
+            if ($areas !== "") {
+                $query->whereHas('area', function ($query) use ($areas) {
+                    $query->where('name', 'like', "%{$areas}%");
+                });
+            }else {
+                $query->with('area');
+            }
+            if ($statusEvent !== "") {
+                $query->where('status', $statusEvent);
+            }
+
+
+
+
 
 
             $query->leftJoin('atendances', function ($join) {
@@ -351,7 +401,17 @@ class eventController extends Controller
                         ->whereColumn('feedback.event_id', 'events.id')
                         ->where('feedback.user_id', Auth::user()->id);
                 }, 'status_feedBack_join');
-            $query->orderBy('id', ($sort) == 'oldest' ? 'asc' : 'desc');
+//            $query->orderBy('id', ($sort) == 'oldest' ? 'asc' : 'desc');
+            if ($rating !== "") {
+                $user_id = Auth::user()->id;
+                $query->withCount(['feedback as user_feedback_count_rating' => function ($query) use ($rating,$user_id) {
+                    $query->where('rating', $rating);
+                }])
+                    ->having('user_feedback_count_rating', '>', 0)
+                    ->orderBy('user_feedback_count_rating', ($sort) == 'oldest' ? 'asc' : 'desc');
+            }else {
+                $query->orderBy('id', ($sort) == 'oldest' ? 'asc' : 'desc');
+            }
             // having là câu lệnh lọc data < ở đây là lọc status_join sau khi đưa ra kết quả
             $query->having('status_join', 1);
             $event = ($status) ? $query->get() : $query->paginate($limit, ['*'], 'page', $page);
@@ -814,6 +874,7 @@ class eventController extends Controller
      * -banner là ảnh của sự kiện
      * -start_time là thời gian bắt đầu sự kiện
      * -end_time là thời gian kết thúc sự kiện
+     * - area là khu vực id tổ chức sự kiện
      * - keywords là mảng chứa các id của keyword có thể để trống
      * ",
      *     operationId="storeEvent",
@@ -823,6 +884,7 @@ class eventController extends Controller
      *             @OA\Property(property="name", type="string", example="Event Name"),
      *             @OA\Property(property="location", type="string", example="Hai Phong"),
      *             @OA\Property(property="contact", type="string", example="0983467584"),
+     *             @OA\Property(property="area", type="integer", example="1"),
      *             @OA\Property(property="banner", type="string",format = "binary", example="anh1.jpg"),
      *             @OA\Property(property="description", type="string", example="Sự kiện rất hoành tráng"),
      *             @OA\Property(property="start_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
@@ -858,6 +920,7 @@ class eventController extends Controller
      *                     @OA\Property(property="email", type="string", example="haudvph20519@fpt.edu.vn"),
      *                     @OA\Property(property="phone", type="string", example="+1 (564) 267-3494"),
      *                     @OA\Property(property="role", type="integer", example="1"),
+     *                     @OA\Property(property="area", type="integer", example="1"),
      *                     @OA\Property(property="google_id", type="string", example="137518716745268"),
      *                     @OA\Property(property="avatar", type="string", example="https://lh3.googleusercontent.com/a/ACg8ocL2nrwZ_mNIBGYaLd8tnzAJLMR0g_UXSVhY_BN67ZWA=s96-c"),
      *                     @OA\Property(property="created_at", type="string", format="date-time", example="2023-12-02T08:55:45.000000Z"),
@@ -930,7 +993,8 @@ class eventController extends Controller
             'content' => 'required',
             'keywords' => ['array',
                 'min:1', // ít nhất một phần tử trong mảng
-                Rule::exists('keywords', 'id')]
+                Rule::exists('keywords', 'id')],
+            'area' => 'required',
         ], [
             'name.required' => 'Không để trống name của của sự kiện nhập',
             'location.required' => 'Không được để trống địa điểm của sự kiện',
@@ -949,6 +1013,7 @@ class eventController extends Controller
             'keywords.array' => 'keywords Phải là 1 array',
             'keywords.min' => 'Keywords Phải có ít nhất 1 phần tủ',
             'keywords.exists' => 'Trong số các keywords đẩy lên có 1 hoặc nhiều keywords không tồn tại,vui lòng thêm và thử lại',
+            'area.required' => 'Không được để trống trường khu vực',
         ]);
         if ($validate->fails()) {
             //            dd($validate->errors());
@@ -1535,7 +1600,7 @@ class eventController extends Controller
 //                $request->banner->move(public_path('Upload'), $img);
 //                Storage::disk('public')->put('Upload/' . $imageName, base64_decode($image));
 //                $imageUrl = Storage::url($imagePath);
-                $resourceData = $request->only(['name', 'location', 'contact', 'status','description', 'banner', 'start_time', 'end_time', 'content', 'user_id', 'keywords']);
+                $resourceData = $request->only(['name', 'location', 'contact', 'status', 'description', 'banner', 'start_time', 'end_time', 'content', 'user_id', 'keywords', 'area']);
 //                $resourceData['banner'] = $imageName;
 //                $resourceData['user_id'] = Auth::user()->id;
 //                $resourceData

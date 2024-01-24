@@ -29,6 +29,8 @@ class participantsController extends Controller
      *     - limit=<số record> số record muốn lấy trong 1 trang
      *     - pagination=true|false sẽ là trạng thái phân trang hoặc không phân trang <mặc định là false phân trang>
      *     - role=0|1|2 khi truyền thêm param này sẽ là lọc data trả ra các user có role nào < Mặc định là role 0>
+     *     - name=<tên người dùng> khi truyền thêm param này sẽ là lọc data trả ra các user có tên như thế < Mặc định là null>
+     *     - email=<email người dùng> khi truyền thêm param này sẽ là lọc data trả ra các user có email như thế < Mặc định là null>
      *     ",
      *     @OA\Response(
      *         response=200,
@@ -100,6 +102,15 @@ class participantsController extends Controller
 
             if ($request->role != null) {
                 $query->where('role', $role);
+            }
+
+            $name = $request->query('name','');
+            if($name !== '' && $name !== null){
+                $query->where('name', 'like', '%' . $name . '%');
+            }
+            $email = $request->query('email','');
+            if($email !== '' && $email !== null){
+                $query->where('email', 'like', '%' . $email . '%');
             }
 //            $users = ($status) ?  User::all() : User::paginate($limit, ['*'], 'page', $page);
             $users = ($status) ? $query->get() : $query->paginate($limit, ['*'], 'page', $page);

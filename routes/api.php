@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\GoogleController;
+use App\Http\Controllers\AreasController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\UserAuthController;
@@ -90,8 +91,9 @@ Route::prefix('event')->group(function() {
     });
 });
 
-//    Route::apiResource('event',eventController::class)->middleware('auth:api');
 
+//    Route::apiResource('event',eventController::class)->middleware('auth:api');
+Route::apiResource('areas',AreasController::class)->middleware('auth:api');
 //Test api in swagger donn't need token
 Route::apiResource('participants',participantsController::class)->middleware('auth:api');
 Route::patch('updateUser',[participantsController::class, 'updateUser'])->middleware('auth:api');
