@@ -19,7 +19,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')->hourly();
 //        everyThirtyMinutes
         $schedule->command('auto:send-mail')->everyThirtyMinutes();
-        $schedule->command('app:calendar-notifition-event')->hourly();
+//        $schedule->command('app:calendar-notifition-event')->hourly();
         $schedule->command('app:update-event-status')->everyFiveMinutes();
     }
 

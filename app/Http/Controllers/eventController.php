@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\event;
 use App\Models\events_keywords;
 use App\Models\keywords;
+use App\Models\notification;
 use App\Models\User;
 use App\Models\atendance;
 use Illuminate\Http\Request;
@@ -834,8 +835,30 @@ class eventController extends Controller
                 $newEventData['start_time'] = $request->start_time;
                 $newEventData['end_time'] = $request->end_time;
 //                $newEventData['banner'] = $imageName;
-                Event::create($newEventData);
+                 Event::create($newEventData);
 
+                $notifidata = [
+                    [
+                        'title' => 'trước' ,
+                        'time_send' => Carbon::parse($request->start_time)->subHours(24)->toDateTimeString()
+                    ],
+                    [
+                        'title' => 'sau' ,
+                        'time_send' => Carbon::parse($request->end_time)->addHours(24)->toDateTimeString()
+                    ]
+                ];
+                $dataInsert = [];
+                foreach($notifidata as $value){
+                    $dataInsert[] = [
+                        'title' => 'Nhắc nhở '.$value['title'].' sự kiện ' . $event->name,
+                        'content' => $event->content,
+                        'time_send' => $value['time_send'],
+                        'user_id' => Auth::user()->id,
+                        'event_id' => $request->id,
+                        'created_at' => Carbon::now()
+                    ];
+                }
+                DB::table('notifications')->insert($dataInsert);
                 $eventRecreate = Event::orderBy('id', 'desc')->with('user')->first();
                 return response()->json([
                     'metadata' => $eventRecreate,
@@ -996,7 +1019,7 @@ class eventController extends Controller
             'keywords' => ['array',
                 'min:1', // ít nhất một phần tử trong mảng
                 Rule::exists('keywords', 'id')],
-            'area' => 'required',
+            'area' => 'required|exists:areas,id',
         ], [
             'name.required' => 'Không để trống name của của sự kiện nhập',
             'location.required' => 'Không được để trống địa điểm của sự kiện',
@@ -1016,6 +1039,7 @@ class eventController extends Controller
             'keywords.min' => 'Keywords Phải có ít nhất 1 phần tủ',
             'keywords.exists' => 'Trong số các keywords đẩy lên có 1 hoặc nhiều keywords không tồn tại,vui lòng thêm và thử lại',
             'area.required' => 'Không được để trống trường khu vực',
+            'area.exists' => 'Cơ sở không tồn tại',
         ]);
         if ($validate->fails()) {
             //            dd($validate->errors());
@@ -1036,7 +1060,33 @@ class eventController extends Controller
                 $resourceData = $request->all();
 //                $resourceData['banner'] = $imageName;
                 $resourceData['user_id'] = Auth::user()->id;
+                $originalTime = Carbon::parse($request->end_time)->addHours(24)->toDateTimeString();
+
+
                 $event = event::create($resourceData);
+
+                $notifidata = [
+                    [
+                        'title' => 'trước' ,
+                        'time_send' => Carbon::parse($request->start_time)->subHours(24)->toDateTimeString()
+                    ],
+                    [
+                        'title' => 'sau' ,
+                        'time_send' => Carbon::parse($request->end_time)->addHours(24)->toDateTimeString()
+                    ]
+                ];
+                $dataInsert = [];
+                foreach($notifidata as $value){
+                    $dataInsert[] = [
+                        'title' => 'Nhắc nhở '.$value['title'].' sự kiện ' . $request->name,
+                        'content' => $request->description,
+                        'time_send' => $value['time_send'],
+                        'user_id' => Auth::user()->id,
+                        'event_id' => $event->id,
+                        'created_at' => Carbon::now()
+                    ];
+                }
+                DB::table('notifications')->insert($dataInsert);
                 $returnData = event::withCount('attendances')->with('user')->findOrFail($event->id);
 //                asset("Upload/{$returnData->banner}")
 //                $returnData->banner = $imageName;
@@ -1547,7 +1597,8 @@ class eventController extends Controller
             'end_time' => ['after:start_time'],
             'keywords' => ['array',
                 'min:1', // ít nhất một phần tử trong mảng
-                Rule::exists('keywords', 'id')]
+                Rule::exists('keywords', 'id')],
+            'area' => 'exists:areas,id'
         ], [
             'name.required' => 'Không để trống name của của sự kiện nhập',
             'location.required' => 'Không được để trống địa điểm của sự kiện',
@@ -1564,7 +1615,8 @@ class eventController extends Controller
             'content.required' => 'Không được để trống trường nội dung',
             'keywords.array' => 'keywords Phải là 1 array',
             'keywords.min' => 'Keywords Phải có ít nhất 1 phần tủ',
-            'keywords.exists' => 'Trong số các keywords đẩy lên có 1 hoặc nhiều keywords không tồn tại,vui lòng thêm và thử lại'
+            'keywords.exists' => 'Trong số các keywords đẩy lên có 1 hoặc nhiều keywords không tồn tại,vui lòng thêm và thử lại',
+            'area.exists' => 'Cơ sở không tồn tại'
         ]);
         if ($validate->fails()) {
             return response([
@@ -1606,6 +1658,17 @@ class eventController extends Controller
 //                $resourceData['banner'] = $imageName;
 //                $resourceData['user_id'] = Auth::user()->id;
 //                $resourceData
+
+                if(!empty($request->start_time)){
+                    $notificationStart = notification::where('time_send',Carbon::parse($event->start_time)->subHours(24)->toDateTimeString())->where('event_id', $event->id)->first();
+                    $notificationStart->time_send = Carbon::parse($request->start_time)->subHours(24)->toDateTimeString();
+                    $notificationStart->save();
+                }
+                if(!empty($request->end_time)){
+                    $notificationEnd = notification::where('time_send',Carbon::parse($event->end_time)->addHours(24)->toDateTimeString())->where('event_id', $event->id)->first();
+                    $notificationEnd->time_send = Carbon::parse($request->end_time)->addHours(24)->toDateTimeString();
+                    $notificationEnd->save();
+                }
                 $event->update($resourceData);
 //                url("Upload/{$event->banner}")
 //                $event->banner = url(Storage::url("Upload/{$imageName}"));
