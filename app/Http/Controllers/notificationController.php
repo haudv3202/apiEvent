@@ -581,22 +581,22 @@ class notificationController extends Controller
             ->whereNull('sent_at')
             ->get();
 
-               if ($emails->count() > 0) {
-                   $notificationsToUpdate = [];
-                   foreach ($emails as $email) {
-                       $data = [
-                           'title' => $email->title,
-                           'message' => $email->content,
-                       ];
-                       if($email->event->attendances->count() > 0){
-                           foreach ($email->event->attendances as $userSend) {
-                               dd($userSend->user->email);
-                           }
-                           $notificationsToUpdate[] = $email->id;
-                       }
-                   }
-                   notification::whereIn('id', $notificationsToUpdate)->update(['sent_at' => now()]);
-               }
+//               if ($emails->count() > 0) {
+//                   $notificationsToUpdate = [];
+//                   foreach ($emails as $email) {
+//                       $data = [
+//                           'title' => $email->title,
+//                           'message' => $email->content,
+//                       ];
+//                       if($email->event->attendances->count() > 0){
+//                           foreach ($email->event->attendances as $userSend) {
+//                               dd($userSend->user->email);
+//                           }
+//                           $notificationsToUpdate[] = $email->id;
+//                       }
+//                   }
+//                   notification::whereIn('id', $notificationsToUpdate)->update(['sent_at' => now()]);
+//               }
         return response()->json([
             'metadata' => $emails,
             'message' => 'Tạo thông báo thành công',
