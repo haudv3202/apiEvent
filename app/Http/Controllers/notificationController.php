@@ -573,32 +573,61 @@ class notificationController extends Controller
 //            ->whereDate('start_time', '=', $currentDateTime->toDateString())
 //            ->where('status', 1)
 //            ->get();
-
-        $currentDateTime = \Illuminate\Support\Carbon::now();
-        $dateCr = $currentDateTime->toDateTimeString();
-        $fiveHoursAhead = $currentDateTime->addHours(12)->toDateTimeString();
-        $events = event::where('start_time', '>=', $dateCr)
-            ->with(['attendances.user', 'user', 'notifications' => function ($query) use ($fiveHoursAhead) {
-                $query->where('time_send', '<', $fiveHoursAhead);
+        $currentDateTime = Carbon::now()->toDateTimeString();
+        $emails = notification::where('time_send', '<=', $currentDateTime)
+            ->with(['event' => function ($query) {
+                $query->with('attendances.user');
             }])
-            ->where('start_time', '<', $fiveHoursAhead)
-            ->where('status', 2)
-            ->where('notification_sent', false)
+            ->whereNull('sent_at')
             ->get();
 
-        $notificationsToUpdateEvent = [];
-        foreach ($events as $item) {
-            if (!empty($item->attendances)) {
-                foreach ($item->attendances as $userSend) {
-                    $data = [
-                        'title' => "EMAIL NHẮC NHỞ SỰ KIỆN " . $item->name,
-                        'message' => $item->notifications->last()->content,
-                    ];
-                    dd($data);
-                    $notificationsToUpdateEvent[] = $item->id;
-                }
-            }
-        }
+               if ($emails->count() > 0) {
+                   $notificationsToUpdate = [];
+                   foreach ($emails as $email) {
+                       $data = [
+                           'title' => $email->title,
+                           'message' => $email->content,
+                       ];
+                       if($email->event->attendances->count() > 0){
+                           foreach ($email->event->attendances as $userSend) {
+                               dd($userSend->user->email);
+                           }
+                           $notificationsToUpdate[] = $email->id;
+                       }
+                   }
+                   notification::whereIn('id', $notificationsToUpdate)->update(['sent_at' => now()]);
+               }
+        return response()->json([
+            'metadata' => $emails,
+            'message' => 'Tạo thông báo thành công',
+            'status' => 'success',
+            'statusCode' => Response::HTTP_OK
+        ], Response::HTTP_OK);
+//        $currentDateTime = \Illuminate\Support\Carbon::now();
+//        $dateCr = $currentDateTime->toDateTimeString();
+//        $fiveHoursAhead = $currentDateTime->addHours(12)->toDateTimeString();
+//        $events = event::where('start_time', '>=', $dateCr)
+//            ->with(['attendances.user', 'user', 'notifications' => function ($query) use ($fiveHoursAhead) {
+//                $query->where('time_send', '<', $fiveHoursAhead);
+//            }])
+//            ->where('start_time', '<', $fiveHoursAhead)
+//            ->where('status', 2)
+//            ->where('notification_sent', false)
+//            ->get();
+//
+//        $notificationsToUpdateEvent = [];
+//        foreach ($events as $item) {
+//            if (!empty($item->attendances)) {
+//                foreach ($item->attendances as $userSend) {
+//                    $data = [
+//                        'title' => "EMAIL NHẮC NHỞ SỰ KIỆN " . $item->name,
+//                        'message' => $item->notifications->last()->content,
+//                    ];
+//                    dd($data);
+//                    $notificationsToUpdateEvent[] = $item->id;
+//                }
+//            }
+//        }
     }
 
     /**
