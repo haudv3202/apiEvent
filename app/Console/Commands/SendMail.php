@@ -47,7 +47,12 @@ class SendMail extends Command
                 ];
                 if($email->event->attendances->count() > 0 && $email->event->count() > 0) {
                     foreach ($email->event->attendances as $userSend) {
-                        Mail::to($userSend->user->email)->send(new EmailApi($data));
+                        if($userSend->user->count() > 0 ){
+                            Mail::to($userSend->user->email)->send(new EmailApi($data));
+                        }else {
+                            Log::info('Truy xuất người dùng không tồn tại');
+                        }
+
                     }
                     $notificationsToUpdate[] = $email->id;
                 }else {
