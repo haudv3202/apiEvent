@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\EmailApi;
 use App\Models\notification;
@@ -49,9 +50,13 @@ class SendMail extends Command
                         Mail::to($userSend->user->email)->send(new EmailApi($data));
                     }
                     $notificationsToUpdate[] = $email->id;
+                }else {
+                    Log::info('Không có người tham gia sự kiện hoặc sự kiện không tồn tại');
                 }
             }
             notification::whereIn('id', $notificationsToUpdate)->update(['sent_at' => now()]);
+        }else {
+            Log::info("Không có email nào cần gửi vào lúc " . $currentDateTime);
         }
 
         return 0;
