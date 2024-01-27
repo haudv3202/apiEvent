@@ -132,7 +132,8 @@ class feedbackController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="event_id", type="integer", example="1"),
      *             @OA\Property(property="content", type="string", example="Feedback content"),
-     *        @OA\Property(property="rating", type="integer", example="5")
+     *        @OA\Property(property="rating", type="integer", example="5"),
+     *     @OA\Property(property="recommend", type="string", example="Recommend content")
      *         )
      *     ),
      *     @OA\Response(
@@ -148,6 +149,8 @@ class feedbackController extends Controller
      *                 @OA\Property(property="content", type="string", example="Feedback content"),
      *                 @OA\Property(property="user_id", type="integer", example="2"),
      *                 @OA\Property(property="event_id", type="integer", example="1"),
+     *            @OA\Property(property="rating", type="integer", example="5"),
+     *     @OA\Property(property="recommend", type="string", example="Recommend content"),
      *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-12-05T12:36:46.000000Z"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-12-05T12:36:46.000000Z"),
      *                 @OA\Property(
@@ -186,7 +189,8 @@ class feedbackController extends Controller
             $validator = Validator::make($request->all(), [
                 'content' => 'required',
                 'event_id' => 'required|exists:events,id',
-                'rating' => 'required|integer|min:1|max:5'
+                'rating' => 'required|integer|min:1|max:5',
+                'recommend' => 'required'
             ], [
                 'content.required' => 'Nội dung không được để trống',
                 'event_id.required' => 'ID của event không được để trống',
@@ -197,12 +201,22 @@ class feedbackController extends Controller
                 'rating.integer' => 'Rating phải là số nguyên',
                 'rating.min' => 'Rating phải lớn hơn 0',
                 'rating.max' => 'Rating phải nhỏ hơn 6',
+                'recommend.required' => 'Recommend không được để trống'
             ]);
 
             if($validator->fails()){
                 return response([
                     "status" => "error",
                     "message" => $validator->errors()->all(),
+                    'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+
+            $Feedback = feedback::where('user_id',Auth::user()->id)->where('event_id',$request->event_id)->first();
+            if($Feedback){
+                return response([
+                    "status" => "error",
+                    "message" => "Bạn đã thêm phản hồi cho sự kiện này rồi",
                     'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR
                 ], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
@@ -221,7 +235,8 @@ class feedbackController extends Controller
                 'content' => $request->input('content'),
                 'event_id' => $request->event_id,
                 'user_id' => Auth::user()->id,
-                'rating' => $request->rating
+                'rating' => $request->rating,
+                'recommend' => $request->recommend
             ]);
             $feedbackWithUser = feedback::with('user')->find($feedback->id);
             return response()->json([

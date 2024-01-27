@@ -50,7 +50,7 @@
                                                                 "type": "string",
                                                                 "example": "Hà nội"
                                                             },
-                                                            "description": {
+                                                            "address": {
                                                                 "type": "string",
                                                                 "example": "mô tả 1"
                                                             },
@@ -179,7 +179,7 @@
                                                     "type": "string",
                                                     "example": "Hà Nội"
                                                 },
-                                                "description": {
+                                                "address": {
                                                     "type": "string",
                                                     "example": "desribe"
                                                 },
@@ -283,7 +283,7 @@
                                                     "type": "string",
                                                     "example": "Hà nội"
                                                 },
-                                                "description": {
+                                                "address": {
                                                     "type": "string",
                                                     "example": "mô tả 1"
                                                 },
@@ -376,7 +376,7 @@
                                                     "type": "string",
                                                     "example": "Hà nội"
                                                 },
-                                                "description": {
+                                                "address": {
                                                     "type": "string",
                                                     "example": "mô tả 1"
                                                 },
@@ -454,7 +454,7 @@
                                         "type": "string",
                                         "example": "Hà Nội"
                                     },
-                                    "description": {
+                                    "address": {
                                         "type": "string",
                                         "example": "mô tả 1"
                                     }
@@ -489,7 +489,7 @@
                                                     "type": "string",
                                                     "example": "Hà Nội"
                                                 },
-                                                "description": {
+                                                "address": {
                                                     "type": "string",
                                                     "example": "desribe"
                                                 },
@@ -4729,6 +4729,10 @@
                                     "rating": {
                                         "type": "integer",
                                         "example": "5"
+                                    },
+                                    "recommend": {
+                                        "type": "string",
+                                        "example": "Recommend content"
                                     }
                                 },
                                 "type": "object"
@@ -4768,6 +4772,14 @@
                                                 "event_id": {
                                                     "type": "integer",
                                                     "example": "1"
+                                                },
+                                                "rating": {
+                                                    "type": "integer",
+                                                    "example": "5"
+                                                },
+                                                "recommend": {
+                                                    "type": "string",
+                                                    "example": "Recommend content"
                                                 },
                                                 "created_at": {
                                                     "type": "string",

@@ -36,7 +36,7 @@ class AreasController extends Controller
      *                         type="object",
      *                         @OA\Property(property="id", type="integer", example="1"),
      *                         @OA\Property(property="name", type="string", example="Hà nội"),
-     *                         @OA\Property(property="description", type="string", example="mô tả 1"),
+     *                         @OA\Property(property="address", type="string", example="mô tả 1"),
      *                         @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-28 17:02:29"),
      *                         @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-28 17:02:29"),
      *                     )
@@ -125,7 +125,7 @@ class AreasController extends Controller
      *                 type="object",
      *                 @OA\Property(property="id", type="integer", example="3"),
      *                 @OA\Property(property="name", type="string", example="Hà Nội"),
-     *                 @OA\Property(property="description", type="string", example="desribe"),
+     *                 @OA\Property(property="address", type="string", example="desribe"),
      *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-12-05T12:36:46.000000Z"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-12-05T12:36:46.000000Z")
      *             )
@@ -220,7 +220,7 @@ class AreasController extends Controller
      *                 type="object",
      *                 @OA\Property(property="id", type="integer", example="1"),
      *                 @OA\Property(property="name", type="string", example="Hà nội"),
-     *                 @OA\Property(property="description", type="string", example="mô tả 1"),
+     *                 @OA\Property(property="address", type="string", example="mô tả 1"),
      *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-28 17:02:29"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-28 17:02:29"),
      *             )
@@ -301,7 +301,7 @@ class AreasController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             @OA\Property(property="name", type="string", example="Hà Nội"),
-     *             @OA\Property(property="description", type="string", example="mô tả 1"),
+     *             @OA\Property(property="address", type="string", example="mô tả 1"),
      *         )
      *     ),
      *     @OA\Response(
@@ -315,7 +315,7 @@ class AreasController extends Controller
      *                 type="object",
      *                 @OA\Property(property="id", type="integer", example="3"),
      *                 @OA\Property(property="name", type="string", example="Hà Nội"),
-     *                 @OA\Property(property="description", type="string", example="desribe"),
+     *                 @OA\Property(property="address", type="string", example="desribe"),
      *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-12-05T12:36:46.000000Z"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-12-05 12:36:46"),
      *        )
@@ -366,7 +366,7 @@ class AreasController extends Controller
                     'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR
                 ], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
-            $area->update($request->only(['name','description']));
+            $area->update($request->only(['name','address']));
             return response()->json([
                 'metadata' => $area,
                 'message' => 'Update Successfully',
@@ -417,7 +417,7 @@ class AreasController extends Controller
      *                 type="object",
      *                 @OA\Property(property="id", type="integer", example="1"),
      *                 @OA\Property(property="name", type="string", example="Hà nội"),
-     *                 @OA\Property(property="description", type="string", example="mô tả 1"),
+     *                 @OA\Property(property="address", type="string", example="mô tả 1"),
      *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-28 17:02:29"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-28 17:02:29"),
      *             )
