@@ -435,6 +435,7 @@ class feedbackController extends Controller
 
 
 
+
             if ($validator->fails()) {
                 return response([
                     "status" => "error",
@@ -442,8 +443,7 @@ class feedbackController extends Controller
                     'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR
                 ], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
-
-            $event = event::find($request->event_id);
+            $event = event::find($request->event_id ?? $feedback->event_id);
             if($event->status == 0){
                 return response([
                     "status" => "error",
