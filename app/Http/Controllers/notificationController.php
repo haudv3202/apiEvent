@@ -564,6 +564,125 @@ class notificationController extends Controller
         }
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/notification/eventSettings/{id}",
+     *     summary="Lấy ra các thông báo đang được cài đặt theo id sự kiện",
+     *     tags={"notification"},
+     *     description="
+     *      - endpoint này trả về các thông báo đang theo id sự kiện.
+     *      - Trả về thông tin các thông báo người dùng đang cài đặt.
+     *      - Vai trò: Quản lí và nhân viên
+     *      - Sẽ có 1 số option param sau
+     *     - page=<số trang> chuyển sang trang cần
+     *     - limit=<số record> số record muốn lấy trong 1 trang
+     *     - event=<id sự kiện muốn tìm>
+     *     - pagination=true|false sẽ là trạng thái phân trang hoặc không phân trang <mặc định là false phân trang>
+     *     - type=<all|sent|scheduled|deleted> sẽ là param để lấy ra các list thông báo đang được setting <mặc định là all>
+     *     - all là lấy ra toàn bộ thông báo đã được setting kể cả đã xóa mềm
+     *     - sent là lấy ra các thông báo đã được gửi
+     *     - scheduled là lấy ra các thông báo đang được cài đặt nhưng chưa được gửi
+     *     - deleted là lấy ra các thông báo đã xóa mềm
+     *     ",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID of the user",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="message", type="string", example="Successfully retrieved all records"),
+     *         @OA\Property(
+     *                 property="metadata",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="title", type="string", example="Nhắc nhở email"),
+     *                     @OA\Property(property="content", type="string", example="<h1 style='color:red;'>Test message</h1>"),
+     *                     @OA\Property(property="time_send", type="string", format="date-time", example="2023-11-25 01:42:27"),
+     *                     @OA\Property(property="sent_at", type="string", format="date-time", example="2023-11-25 01:50:33"),
+     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2023-11-28 11:00:00"),
+     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2023-11-28 11:30:00")
+     *                 )
+     *             ),
+     *                 @OA\Property(property="totalDocs", type="integer", example=16),
+     *                 @OA\Property(property="limit", type="integer", example=10),
+     *                 @OA\Property(property="totalPages", type="integer", example=2),
+     *                 @OA\Property(property="page", type="integer", example=2),
+     *                 @OA\Property(property="pagingCounter", type="integer", example=2),
+     *                 @OA\Property(property="hasPrevPage", type="boolean", example=true),
+     *                 @OA\Property(property="hasNextPage", type="boolean", example=false)
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function getSettingsEventNotification($id,Request $request)
+    {
+        try {
+            if (Auth::user()->role == 0) {
+                return response([
+                    "status" => "error",
+                    "message" => "Role người Get không hợp lệ.Vui lòng thử lại!!",
+                    'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+            $page = $request->query('page', 1);
+            $limit = $request->query('limit', 10);
+            $status = $request->query('pagination', false);
+            $type = $request->query('type', 'all');
+            $query = notification::with(['event', 'create_by', 'userJoin.user']);
+            $sender = $request->query('sender');
+            if (!empty($sender)) {
+                $id = $sender;
+            }
+            $query->where('event_id', $id);
+//            dd($query->toSql());
+            // Tìm kiếm theo title (tiêu đề thông báo)
+            $title = $request->query('title');
+            if (!empty($title)) {
+                $query->where('title', 'like', '%' . $title . '%');
+            }
+
+            $eventId = $request->query('event');
+            if (!empty($eventId)) {
+                $query->where('event_id',$eventId );
+            }
+
+            // Tìm kiếm theo from_date và to_date
+            $fromDate = $request->query('from_date');
+            $toDate = $request->query('to_date', now()->toDateTimeString());
+
+            if ($fromDate) {
+                $query->where('sent_at', '>=', $fromDate);
+
+                if ($toDate) {
+                    $query->where('sent_at', '<=', $toDate);
+                }
+            }
+            $notification = getNotifications($query, $status, $type, $limit, $page);
+            if ($page > $notification->lastPage()) {
+                $page = 1;
+//                with('user_receiver')->
+                $notification = getNotifications($query, $status, $type, $limit, $page);
+            }
+            return response()->json(handleData($status, $notification), Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => 'error',
+                'statusCode' => Response::HTTP_NOT_FOUND
+            ], Response::HTTP_NOT_FOUND);
+        }
+    }
+
     public function test()
     {
 //        $currentDateTime = Carbon::now();
