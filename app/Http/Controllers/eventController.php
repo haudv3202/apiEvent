@@ -1523,6 +1523,7 @@ class eventController extends Controller
      *             @OA\Property(property="start_time", type="string", format="date-time", example="2023-11-23 11:20:22"),
      *             @OA\Property(property="end_time", type="string", format="date-time", example="2023-11-23 11:20:22"),
      *                       @OA\Property(property="content", type="string", example="Chào mừng tổng thống"),
+     *                       @OA\Property(property="area_id", type="integer", example="1"),
      *       *      @OA\Property(property="keywords",type="array",@OA\Items(type="integer"),example="[1, 2]")
      *         )
      *     ),
@@ -1654,7 +1655,7 @@ class eventController extends Controller
 //                $request->banner->move(public_path('Upload'), $img);
 //                Storage::disk('public')->put('Upload/' . $imageName, base64_decode($image));
 //                $imageUrl = Storage::url($imagePath);
-                $resourceData = $request->only(['name', 'location', 'contact', 'status', 'description', 'banner', 'start_time', 'end_time', 'content', 'user_id', 'keywords', 'area']);
+                $resourceData = $request->only(['name', 'location', 'contact', 'status', 'description', 'banner', 'start_time', 'end_time', 'content', 'user_id', 'keywords', 'area_id']);
 //                $resourceData['banner'] = $imageName;
 //                $resourceData['user_id'] = Auth::user()->id;
 //                $resourceData

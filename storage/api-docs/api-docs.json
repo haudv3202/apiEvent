@@ -3719,6 +3719,10 @@
                                         "type": "string",
                                         "example": "Chào mừng tổng thống"
                                     },
+                                    "area_id": {
+                                        "type": "integer",
+                                        "example": "1"
+                                    },
                                     "keywords": {
                                         "type": "array",
                                         "items": {
