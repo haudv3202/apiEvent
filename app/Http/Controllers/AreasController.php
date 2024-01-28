@@ -339,9 +339,9 @@ class AreasController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'name' => 'unique:areas,name',
+                'name' => 'required',
             ], [
-                'name.unique' => 'Tên cơ sở đã tồn tại'
+                'name.required' => 'Tên cơ sở không để trống',
             ]);
 
             if($validator->fails()){
