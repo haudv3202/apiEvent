@@ -1234,6 +1234,7 @@ class eventController extends Controller
 //                        ->where('feedback.user_id', Auth::user()->id);
 //                }, 'status_feedback')
                 ->with([
+                    'area',
                     'feedback' => function ($query) {
                         $query->with('user');
                     },
