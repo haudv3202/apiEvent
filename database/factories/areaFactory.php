@@ -17,8 +17,8 @@ class areaFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => "Hà nội",
-            'description' => fake()->unique()->address(),
+            'name' => fake()->unique()->address(),
+            'address' => fake()->unique()->address(),
         ];
     }
 }

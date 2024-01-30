@@ -909,7 +909,7 @@ class eventController extends Controller
      *             @OA\Property(property="name", type="string", example="Event Name"),
      *             @OA\Property(property="location", type="string", example="Hai Phong"),
      *             @OA\Property(property="contact", type="string", example="0983467584"),
-     *             @OA\Property(property="area", type="integer", example="1"),
+     *             @OA\Property(property="area_id", type="integer", example="1"),
      *             @OA\Property(property="banner", type="string",format = "binary", example="anh1.jpg"),
      *             @OA\Property(property="description", type="string", example="Sự kiện rất hoành tráng"),
      *             @OA\Property(property="start_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
@@ -1019,7 +1019,7 @@ class eventController extends Controller
             'keywords' => ['array',
                 'min:1', // ít nhất một phần tử trong mảng
                 Rule::exists('keywords', 'id')],
-            'area' => 'required|exists:areas,id',
+            'area_id' => 'required|exists:areas,id',
         ], [
             'name.required' => 'Không để trống name của của sự kiện nhập',
             'location.required' => 'Không được để trống địa điểm của sự kiện',
@@ -1600,7 +1600,7 @@ class eventController extends Controller
             'keywords' => ['array',
                 'min:1', // ít nhất một phần tử trong mảng
                 Rule::exists('keywords', 'id')],
-            'area' => 'exists:areas,id'
+            'area_id' => 'exists:areas,id'
         ], [
             'name.required' => 'Không để trống name của của sự kiện nhập',
             'location.required' => 'Không được để trống địa điểm của sự kiện',

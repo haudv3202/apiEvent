@@ -2275,7 +2275,7 @@
                                         "type": "string",
                                         "example": "0983467584"
                                     },
-                                    "area": {
+                                    "area_id": {
                                         "type": "integer",
                                         "example": "1"
                                     },
