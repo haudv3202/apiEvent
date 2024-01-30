@@ -910,6 +910,7 @@ class eventController extends Controller
      *             @OA\Property(property="location", type="string", example="Hai Phong"),
      *             @OA\Property(property="contact", type="string", example="0983467584"),
      *             @OA\Property(property="area_id", type="integer", example="1"),
+     *             @OA\Property(property="user_id", type="integer", example="1"),
      *             @OA\Property(property="banner", type="string",format = "binary", example="anh1.jpg"),
      *             @OA\Property(property="description", type="string", example="Sự kiện rất hoành tráng"),
      *             @OA\Property(property="start_time", type="string",format="date-time", example="2023-11-23 11:20:22"),
@@ -1008,6 +1009,7 @@ class eventController extends Controller
             'name' => ['required'],
             'location' => ['required'],
             'description' => 'required',
+            'user_id' => 'exists:users,id',
             'contact' => [
                 'required',
                 'regex:/^(\+?\d{1,3}[- ]?)?\d{10}$/'
@@ -1027,6 +1029,7 @@ class eventController extends Controller
             'contact.regex' => 'Định dạng số điện thoại được nhập không đúng',
             'banner.image' => 'Vui lòng upload banner định dạng file',
             'banner.mimes' => 'Vui lòng upload banner định dạng jpeg,png,jpg,gif,svg',
+            'user_id.exists' => 'Người dùng không tồn tại',
 //            'user_id.required' => 'User Id không được để trống',
             'banner.required' => 'Ảnh sự kiện bắt buộc phải có',
             'start_time.required' => 'Ngày khởi đầu của event không được để trống',
@@ -1059,7 +1062,12 @@ class eventController extends Controller
 //                $request->banner->storeAs('Upload', $imageName, 'public');
                 $resourceData = $request->all();
 //                $resourceData['banner'] = $imageName;
-                $resourceData['user_id'] = Auth::user()->id;
+                if (isset($request->user_id)) {
+                    $resourceData['user_id'] = $request->user_id;
+                } else {
+                    $resourceData['user_id'] = Auth::user()->id;
+                }
+
                 $originalTime = Carbon::parse($request->end_time)->addHours(24)->toDateTimeString();
 
 
@@ -1520,6 +1528,7 @@ class eventController extends Controller
      *             @OA\Property(property="location", type="string", example="Hai Phong"),
      *             @OA\Property(property="contact", type="string", example="0983118678"),
      *             @OA\Property(property="status", type="integer", example=0),
+     *             @OA\Property(property="user_id", type="integer", example=0),
      * @OA\Property(property="banner", type="string", example="anh1.jpg"),
      *             @OA\Property(property="start_time", type="string", format="date-time", example="2023-11-23 11:20:22"),
      *             @OA\Property(property="end_time", type="string", format="date-time", example="2023-11-23 11:20:22"),
@@ -1600,7 +1609,8 @@ class eventController extends Controller
             'keywords' => ['array',
                 'min:1', // ít nhất một phần tử trong mảng
                 Rule::exists('keywords', 'id')],
-            'area_id' => 'exists:areas,id'
+            'area_id' => 'exists:areas,id',
+            'user_id' => 'exists:users,id',
         ], [
             'name.required' => 'Không để trống name của của sự kiện nhập',
             'location.required' => 'Không được để trống địa điểm của sự kiện',
@@ -1608,6 +1618,7 @@ class eventController extends Controller
             'contact.regex' => 'Định dạng số điện thoại được nhập không đúng',
             'status.required' => 'Trạng thái của sự kiện không được để trống',
             'status.in' => 'Vui lòng nhập đúng trạng thái',
+            'user_id.exists' => 'User Id không tồn tại',
 //            'user_id.required' => 'User Id không được để trống',
             'start_time.required' => 'Ngày khởi đầu của event không được để trống',
             'end_time.required' => 'Ngày kết thúc của event không được để trống',

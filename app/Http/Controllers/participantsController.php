@@ -28,7 +28,7 @@ class participantsController extends Controller
      *     - page=<số trang> chuyển sang trang cần
      *     - limit=<số record> số record muốn lấy trong 1 trang
      *     - pagination=true|false sẽ là trạng thái phân trang hoặc không phân trang <mặc định là false phân trang>
-     *     - role=0|1|2 khi truyền thêm param này sẽ là lọc data trả ra các user có role nào < Mặc định là role 0>
+     *     - role=0,1,2 khi truyền thêm param này sẽ là lọc data trả ra các user có role nào < Mặc định là role 0>
      *     - name=<tên người dùng> khi truyền thêm param này sẽ là lọc data trả ra các user có tên như thế < Mặc định là null>
      *     - email=<email người dùng> khi truyền thêm param này sẽ là lọc data trả ra các user có email như thế < Mặc định là null>
      *     ",
@@ -101,7 +101,13 @@ class participantsController extends Controller
             $query = User::query();
 
             if ($request->role != null) {
-                $query->where('role', $role);
+                if (strpos($role, ',') !== false) {
+                    $roles = explode(',', $role);
+                    $query->whereIn('role', $roles);
+                } else {
+                    // Nếu không có dấu phẩy, thực hiện truy vấn với điều kiện cho role đơn
+                    $query->where('role', $role);
+                }
             }
 
             $name = $request->query('name','');

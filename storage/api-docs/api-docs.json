@@ -2279,6 +2279,10 @@
                                         "type": "integer",
                                         "example": "1"
                                     },
+                                    "user_id": {
+                                        "type": "integer",
+                                        "example": "1"
+                                    },
                                     "banner": {
                                         "type": "string",
                                         "format": "binary",
@@ -3698,6 +3702,10 @@
                                         "example": "0983118678"
                                     },
                                     "status": {
+                                        "type": "integer",
+                                        "example": 0
+                                    },
+                                    "user_id": {
                                         "type": "integer",
                                         "example": 0
                                     },
@@ -7384,7 +7392,7 @@
                     "Participants"
                 ],
                 "summary": "Lấy tất cả bản ghi",
-                "description": "\n     *      - Endpoint trả về thôn tin của tất cả người dùng.\n     *      - Role được sử dụng là role quản lí\n     *      - Sẽ có 1 số option param sau\n     *     - page=<số trang> chuyển sang trang cần\n     *     - limit=<số record> số record muốn lấy trong 1 trang\n     *     - pagination=true|false sẽ là trạng thái phân trang hoặc không phân trang <mặc định là false phân trang>\n     *     - role=0|1|2 khi truyền thêm param này sẽ là lọc data trả ra các user có role nào < Mặc định là role 0>\n     *     - name=<tên người dùng> khi truyền thêm param này sẽ là lọc data trả ra các user có tên như thế < Mặc định là null>\n     *     - email=<email người dùng> khi truyền thêm param này sẽ là lọc data trả ra các user có email như thế < Mặc định là null>\n     *     ",
+                "description": "\n     *      - Endpoint trả về thôn tin của tất cả người dùng.\n     *      - Role được sử dụng là role quản lí\n     *      - Sẽ có 1 số option param sau\n     *     - page=<số trang> chuyển sang trang cần\n     *     - limit=<số record> số record muốn lấy trong 1 trang\n     *     - pagination=true|false sẽ là trạng thái phân trang hoặc không phân trang <mặc định là false phân trang>\n     *     - role=0,1,2 khi truyền thêm param này sẽ là lọc data trả ra các user có role nào < Mặc định là role 0>\n     *     - name=<tên người dùng> khi truyền thêm param này sẽ là lọc data trả ra các user có tên như thế < Mặc định là null>\n     *     - email=<email người dùng> khi truyền thêm param này sẽ là lọc data trả ra các user có email như thế < Mặc định là null>\n     *     ",
                 "operationId": "21e1cd188747fc59953037ea2feb3072",
                 "responses": {
                     "200": {
