@@ -45,7 +45,7 @@ class SendMail extends Command
                     'title' => $email->title,
                     'message' => $email->content,
                 ];
-                if($email->event->count() > 0 && $email->event->attendances->count() > 0) {
+                if( !empty($email->event) && !empty($email->event->attendances)) {
                     foreach ($email->event->attendances as $userSend) {
                         if($userSend->user->count() > 0 ){
                             Mail::to($userSend->user->email)->send(new EmailApi($data));
