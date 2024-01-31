@@ -57,10 +57,9 @@ class SendMail extends Command
                     }
                     $notificationsToUpdate[] = $email->id;
                 }else {
-                    Log::info('Không có người tham gia sự kiện hoặc sự kiện không tồn tại');
+                    Log::info('Không có người tham gia sự kiện hoặc sự kiện không tồn tại' + $email->id);
                 }
 
-                Log::info('chạy lần' + $key+1);
             }
             notification::whereIn('id', $notificationsToUpdate)->update(['sent_at' => now()]);
         }else {
