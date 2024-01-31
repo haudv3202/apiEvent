@@ -40,11 +40,13 @@ class SendMail extends Command
 
         if ($emails->count() > 0) {
             $notificationsToUpdate = [];
-            foreach ($emails as $email) {
+            foreach ($emails as $key =>  $email) {
                 $data = [
                     'title' => $email->title,
                     'message' => $email->content,
                 ];
+
+
                 if( !empty($email->event) && !empty($email->event->attendances)) {
                     foreach ($email->event->attendances as $userSend) {
                         if($userSend->user->count() > 0 ){
@@ -52,12 +54,13 @@ class SendMail extends Command
                         }else {
                             Log::info('Truy xuất người dùng không tồn tại');
                         }
-
                     }
                     $notificationsToUpdate[] = $email->id;
                 }else {
                     Log::info('Không có người tham gia sự kiện hoặc sự kiện không tồn tại');
                 }
+
+                Log::info('chạy lần' + $key+1);
             }
             notification::whereIn('id', $notificationsToUpdate)->update(['sent_at' => now()]);
         }else {
