@@ -699,7 +699,56 @@ class notificationController extends Controller
             }])
             ->whereNull('sent_at')
             ->get();
+        return response()->json([
+            'metadata' => $emails,
+            'message' => 'Truy xuất người thành công',
+            'status' => 'success',
+            'statusCode' => Response::HTTP_OK
+        ], Response::HTTP_OK);
 
+        if ($emails->count() > 0) {
+            $notificationsToUpdate = [];
+            foreach ($emails as $email) {
+                $data = [
+                    'title' => $email->title,
+                    'message' => $email->content,
+                ];
+                if($email->event->attendances->count() > 0 && $email->event->count() > 0) {
+                    foreach ($email->event->attendances as $userSend) {
+                        if($userSend->user->count() > 0 ){
+//                            Mail::to($userSend->user->email)->send(new EmailApi($data));
+                            return response()->json([
+                                'metadata' => $data,
+                                'message' => 'Truy xuất người dùng không tồn tại',
+                                'status' => 'success',
+                                'statusCode' => Response::HTTP_OK
+                            ], Response::HTTP_OK);
+                        }else {
+                            return response()->json([
+                                'message' => 'Truy xuất người dùng không tồn tại',
+                                'status' => 'success',
+                                'statusCode' => Response::HTTP_OK
+                            ], Response::HTTP_OK);
+                        }
+
+                    }
+                    $notificationsToUpdate[] = $email->id;
+                }else {
+                    return response()->json([
+                        'message' => 'Không có người tham gia sự kiện hoặc sự kiện không tồn tại',
+                        'status' => 'success',
+                        'statusCode' => Response::HTTP_OK
+                    ], Response::HTTP_OK);
+                }
+            }
+            notification::whereIn('id', $notificationsToUpdate)->update(['sent_at' => now()]);
+        }else {
+            return response()->json([
+                'message' => "Không có email nào cần gửi vào lúc " . $currentDateTime,
+                'status' => 'success',
+                'statusCode' => Response::HTTP_OK
+            ], Response::HTTP_OK);
+        }
 //               if ($emails->count() > 0) {
 //                   $notificationsToUpdate = [];
 //                   foreach ($emails as $email) {

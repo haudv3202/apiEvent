@@ -58,7 +58,7 @@ Route::middleware('auth:api')->prefix('feedback')->group(function() {
 //Route::apiResource('notification',notificationController::class)->middleware('auth:api');
 Route::middleware('auth:api')->prefix('notification')->group(function() {
     Route::post('/send',[notificationController::class,'create']);
-//    Route::get('/test',[notificationController::class,'test']);
+    Route::get('/test',[notificationController::class,'test']);
     Route::get('/',[notificationController::class,'index']);
 //    Route::get('/search',[notificationController::class,'search']);
     Route::get('/getNotificationDel/{id}',[notificationController::class,'showNotificationDel']);
