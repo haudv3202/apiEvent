@@ -837,10 +837,11 @@ class participantsController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/api/participants/{id}",
+     *     path="/api/participants/{List ID}",
      *     summary="Xóa 1 bản ghi người dùng",
      * description="
-     * - id là id của người dùng
+     * - List ID là id người dùng cần xóa có thể xóa nhiều người dùng cùng lúc bằng cách phân cách bằng dấu phẩy
+     * - Ví dụ muốn xóa 1 người thì truyền là 1, muốn xóa nhiều người thì truyền là 1,2,3,4
      * - Role xóa chỉ có thể là quản lí
      * ",
      *     tags={"Participants"},
@@ -883,17 +884,18 @@ class participantsController extends Controller
      *     )
      * )
      */
-    public function destroy($id)
+    public function destroy($listUser)
     {
         try {
-            $user = User::findOrFail($id);
-            if (!$user) {
-                return response()->json([
-                    'message' => 'Record not exists',
-                    'status' => 'error',
-                    'statusCode' => Response::HTTP_NOT_FOUND
-                ], Response::HTTP_NOT_FOUND);
-            }
+//            dd($listUser);
+//            $user = User::findOrFail($listUser);
+//            if (!$user) {
+//                return response()->json([
+//                    'message' => 'Record not exists',
+//                    'status' => 'error',
+//                    'statusCode' => Response::HTTP_NOT_FOUND
+//                ], Response::HTTP_NOT_FOUND);
+//            }
             if (auth()->user()->role != 2) {
                 return response()->json([
                     'message' => 'Không thể xóa bản ghi do role không phải quản lí',
@@ -901,12 +903,23 @@ class participantsController extends Controller
                     'statusCode' => Response::HTTP_CONFLICT
                 ], Response::HTTP_CONFLICT);
             }
-            $user->delete();
-            return response()->json([
-                'message' => 'Delete One Record Successfully',
-                'status' => 'success',
-                'statusCode' => Response::HTTP_OK
-            ], Response::HTTP_OK);
+            $userIdsArray = explode(',', $listUser);
+
+            $userIds = array_map('intval', $userIdsArray);
+            $deletedUsers = User::whereIn('id', $userIds)->delete();
+            if ($deletedUsers > 0) {
+                return response()->json([
+                    'message' => 'Xóa '.$deletedUsers.' người dùng thành công',
+                    'status' => 'success',
+                    'statusCode' => Response::HTTP_OK
+                ], Response::HTTP_OK);
+            } else {
+                return response()->json([
+                    'message' => 'Không có người dùng nào được xóa',
+                    'status' => 'error',
+                    'statusCode' => Response::HTTP_NOT_FOUND
+                ], Response::HTTP_NOT_FOUND);
+            }
         } catch (\Exception $e) {
             return response([
                 "status" => "error",

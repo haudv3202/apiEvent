@@ -8028,99 +8028,6 @@
                     }
                 }
             },
-            "delete": {
-                "tags": [
-                    "Participants"
-                ],
-                "summary": "Xóa 1 bản ghi người dùng",
-                "description": "\n     * - id là id của người dùng\n     * - Role xóa chỉ có thể là quản lí\n     * ",
-                "operationId": "ec6365c5f315ce8381da73eafdc5ccb3",
-                "parameters": [
-                    {
-                        "name": "participants",
-                        "in": "path",
-                        "description": "Mô hình dữ liệu người dùng",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "success"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Xóa bản ghi thành công"
-                                        },
-                                        "statusCode": {
-                                            "type": "integer",
-                                            "example": 200
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Record not exists",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "error"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Bản ghi không tồn tại"
-                                        },
-                                        "statusCode": {
-                                            "type": "integer",
-                                            "example": 404
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Lỗi server",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "error"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Lỗi server"
-                                        },
-                                        "statusCode": {
-                                            "type": "integer",
-                                            "example": 500
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
             "patch": {
                 "tags": [
                     "Participants"
@@ -8388,6 +8295,101 @@
                                         "statusCode": {
                                             "description": "HTTP status code (500)",
                                             "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/participants/{List ID}": {
+            "delete": {
+                "tags": [
+                    "Participants"
+                ],
+                "summary": "Xóa 1 bản ghi người dùng",
+                "description": "\n     * - List ID là id người dùng cần xóa có thể xóa nhiều người dùng cùng lúc bằng cách phân cách bằng dấu phẩy\n     * - Ví dụ muốn xóa 1 người thì truyền là 1, muốn xóa nhiều người thì truyền là 1,2,3,4\n     * - Role xóa chỉ có thể là quản lí\n     * ",
+                "operationId": "c7507d8f4195675044a737b953cf138b",
+                "parameters": [
+                    {
+                        "name": "participants",
+                        "in": "path",
+                        "description": "Mô hình dữ liệu người dùng",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Xóa bản ghi thành công"
+                                        },
+                                        "statusCode": {
+                                            "type": "integer",
+                                            "example": 200
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Record not exists",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Bản ghi không tồn tại"
+                                        },
+                                        "statusCode": {
+                                            "type": "integer",
+                                            "example": 404
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Lỗi server",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Lỗi server"
+                                        },
+                                        "statusCode": {
+                                            "type": "integer",
+                                            "example": 500
                                         }
                                     },
                                     "type": "object"
