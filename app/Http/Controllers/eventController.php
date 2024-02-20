@@ -1953,13 +1953,13 @@ class eventController extends Controller
 
         //Validate nếu mẫu bằng 0
         $percentInEvent = ($eventInLastMonth == 0)
-            ? 1
+            ? 0
             : ($eventInCurrentMonth - $eventInLastMonth) / $eventInLastMonth;
         $percentInJoinEvent = ($joinEventInLastMonth == 0)
-            ? 1
+            ? 0
             : ($joinEventInCurrentMonth - $joinEventInLastMonth) / $joinEventInLastMonth;
         $percentInFeedBack = ($feedBackInLastMonth == 0)
-            ? 1
+            ? 0
             : ($feedBackInCurrentMonth - $feedBackInLastMonth) / $feedBackInLastMonth;
 
         $returnData = [
